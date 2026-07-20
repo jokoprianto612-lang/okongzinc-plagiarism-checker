@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Wrangler
+.wrangler/
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test artifacts
+test-*.js
+vtest-*/
+1409615.png

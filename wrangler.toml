@@ -1,0 +1,25 @@
+name = "plagiarism-checker"
+main = "src/index.js"
+compatibility_date = "2024-11-18"
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "plagiarism-db"
+
+[ai]
+binding = "AI"
+
+[[kv_namespaces]]
+binding = "HISTORY"
+id = "b03d206fb7a942a882691dd803abec12"
+
+[vars]
+PLAGIARISM_THRESHOLD = "0.75"
+MAX_RESULTS = "100"
+BATCH_SIZE = "50"
+MODEL_NAME = "@cf/baai/bge-large-en-v1.5"
+# Turnstile secret key (kosong = verification di-skip). Set via: wrangler secret put TURNSTILE_SECRET_KEY
+TURNSTILE_SECRET_KEY = ""
+
+compatibility_flags = ["nodejs_compat"]
+observability = { enabled = true, head_sampling_rate = 1.0 }

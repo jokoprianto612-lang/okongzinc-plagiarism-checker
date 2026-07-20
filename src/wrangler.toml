@@ -1,0 +1,19 @@
+name = "plagiarism-checker"
+main = "src/index.js"
+compatibility_date = "2024-11-18"
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "plagiarism-db"
+
+[ai]
+binding = "AI"
+
+[vars]
+PLAGIARISM_THRESHOLD = "0.75"
+MAX_RESULTS = "100"
+BATCH_SIZE = "50"
+MODEL_NAME = "@cf/baai/bge-large-en-v1.5"
+
+compatibility_flags = ["nodejs_compat"]
+observability = { enabled = true, head_sampling_rate = 1.0 }

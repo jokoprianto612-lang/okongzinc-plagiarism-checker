@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Content Security Policy: restrict external resources, block inline event handlers except Turnstile + anime.js -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: blob:; connect-src 'self' https://plagiarism-checker.claudeh1761.workers.dev https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com;" />
+    <title>OkongzINC Checker · Ado</title>
+
+    <!-- Favicon: SVG shield inline -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 L85 20 V50 C85 75 65 90 50 95 C35 90 15 75 15 50 V20 Z' fill='%230f62fe'/%3E%3Ctext x='50' y='65' font-size='40' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'%3EO%3C/text%3E%3C/svg%3E" />
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* ============================================================
+           ROOT TOKENS + DARK MODE
+           ============================================================ */
+        :root {
+            --bg: #f4f4f4;
+            --bg-card: rgba(255, 255, 255, 0.75);
+            --bg-card-alt: rgba(255, 255, 255, 0.50);
+            --bg-input: rgba(255, 255, 255, 0.85);
+            --bg-hover: rgba(0, 0, 0, 0.05);
+            --bg-active: rgba(0, 0, 0, 0.10);
+            --text: #161616;
+            --text-secondary: #525252;
+            --text-muted: #8d8d8d;
+            --text-inverse: #ffffff;
+            --border: rgba(0, 0, 0, 0.10);
+            --border-soft: rgba(0, 0, 0, 0.06);
+            --border-focus: #0f62fe;
+            --primary: #0f62fe;
+            --primary-hover: #0353e9;
+            --primary-light: rgba(15, 98, 254, 0.15);
+            --success: #24a148;
+            --success-bg: rgba(36, 161, 72, 0.15);
+            --danger: #da1e28;
+            --danger-bg: rgba(218, 30, 40, 0.15);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --font: 'Inter', sans-serif;
+            --transition: all 0.25s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg: #161616;
+            --bg-card: rgba(20, 20, 20, 0.78);
+            --bg-card-alt: rgba(20, 20, 20, 0.50);
+            --bg-input: rgba(30, 30, 30, 0.85);
+            --bg-hover: rgba(255, 255, 255, 0.05);
+            --bg-active: rgba(255, 255, 255, 0.10);
+            --text: #f4f4f4;
+            --text-secondary: #b0b0b0;
+            --text-muted: #8d8d8d;
+            --text-inverse: #161616;
+            --border: rgba(255, 255, 255, 0.10);
+            --border-soft: rgba(255, 255, 255, 0.06);
+            --border-focus: #0f62fe;
+            --primary: #78a9ff;
+            --primary-hover: #5c8cff;
+            --primary-light: rgba(120, 169, 255, 0.15);
+            --success: #42be65;
+            --success-bg: rgba(66, 190, 101, 0.15);
+            --danger: #ff8389;
+            --danger-bg: rgba(255, 131, 137, 0.15);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ============================================================
+           BACKGROUND — Ado Wallpaper (1409615.png)
+           ============================================================ */
+        body {
+            background-image: url('1409615.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: var(--font);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+            transition: var(--transition);
+        }
+
+        [data-theme="light"] body {
+            background-color: rgba(255, 255, 255, 0.78);
+            background-blend-mode: overlay;
+        }
+
+        [data-theme="dark"] body {
+            background-color: rgba(0, 0, 0, 0.72);
+            background-blend-mode: overlay;
+        }
+
+        /* ============================================================
+           GLASSMORPHISM — Semua Card
+           ============================================================ */
+        .header, .panel, .tabs, .drop-zone, .stat-card, .result-item,
+        .turnitin-box, .faq-section details, .switch-wrap, .file-item,
+        .manage-result, .badge-status, .badge-dims, .badge-cloudflare,
+        .lang-selector {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            transition: var(--transition);
+        }
+
+        /* ============================================================
+           RESET & LAYOUT
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .app { max-width: 1200px; margin: 0 auto; display: grid; gap: 20px; min-height: 100vh; grid-template-rows: auto auto 1fr auto; }
+
+        /* ============================================================
+           HEADER — Logo kiri, elemen kanan
+           ============================================================ */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            padding: 14px 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; flex-shrink: 0; }
+        .logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+        .logo-sub { font-size: 12px; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
+        .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+        .badge-status, .badge-dims { padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text-secondary); background: var(--bg-card); white-space: nowrap; }
+        .badge-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); display: inline-block; margin-right: 4px; }
+        .badge-cloudflare { padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #f38020, #faa51a); border: none; box-shadow: 0 2px 8px rgba(243,128,32,0.3); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .badge-cloudflare i { font-size: 13px; }
+        .lang-selector { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-secondary); background: var(--bg-card); cursor: pointer; outline: none; transition: var(--transition); white-space: nowrap; }
+        .lang-selector:hover { background: var(--bg-hover); }
+        .btn-icon { width: 36px; height: 36px; border: none; background: transparent; border-radius: 50%; color: var(--text-secondary); cursor: pointer; font-size: 18px; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .btn-icon:hover { background: var(--bg-hover); color: var(--text); }
+
+        /* ============================================================
+           TABS
+           ============================================================ */
+        .tabs { display: flex; gap: 2px; padding: 4px; border-radius: var(--radius); flex-wrap: wrap; box-shadow: var(--shadow); }
+        .tab-btn { padding: 10px 20px; border: none; background: transparent; border-radius: var(--radius); font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 8px; }
+        .tab-btn:hover { background: var(--bg-hover); color: var(--text); }
+        .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(15,98,254,0.25); }
+
+        /* ============================================================
+           PANELS
+           ============================================================ */
+        .panel { display: none; border-radius: var(--radius-lg); padding: 28px 32px; box-shadow: var(--shadow); animation: fadeIn 0.3s ease; }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .panel-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px; }
+        .panel-icon { width: 40px; height: 40px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--primary-light); color: var(--primary); }
+        .panel-title { font-size: 18px; font-weight: 600; color: var(--text); }
+        .panel-sub { font-size: 13px; color: var(--text-secondary); }
+
+        /* ============================================================
+           FORM
+           ============================================================ */
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+        textarea, input, select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 14px; background: var(--bg-input); color: var(--text); transition: var(--transition); resize: vertical; }
+        textarea { min-height: 150px; line-height: 1.7; }
+        textarea:focus, input:focus, select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(15,98,254,0.15); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0 12px; }
+        .counter { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-top: 4px; padding: 0 2px; }
+        .switch-wrap { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius); margin: 8px 0; }
+        .switch-wrap input[type="checkbox"] { width: 40px; height: 22px; appearance: none; background: var(--bg-active); border-radius: 11px; position: relative; cursor: pointer; transition: var(--transition); flex-shrink: 0; }
+        .switch-wrap input[type="checkbox"]:checked { background: var(--primary); }
+        .switch-wrap input[type="checkbox"]::before { content: ''; position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: var(--transition); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+        .switch-wrap input[type="checkbox"]:checked::before { left: 21px; }
+        .switch-wrap label { font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d8d8d' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .btn { padding: 10px 22px; border: none; border-radius: var(--radius); font-family: var(--font); font-weight: 600; font-size: 13px; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(15,98,254,0.2); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+        .btn-outline:hover { background: var(--bg-hover); color: var(--text); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+        /* ============================================================
+           DROP ZONE, FILE LIST, RESULTS, TURNITIN BOX, MANAGE, TOAST, FOOTER
+           ============================================================ */
+        .drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 36px 20px; text-align: center; cursor: pointer; transition: var(--transition); }
+        .drop-zone:hover { border-color: var(--primary); background: var(--primary-light); }
+        .drop-zone i { font-size: 32px; color: var(--text-muted); margin-bottom: 8px; display: block; }
+        .file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .file-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; }
+        .file-item i { color: var(--primary); font-size: 16px; }
+        .results-wrap { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 18px; display: none; }
+        .results-wrap.active { display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .stat-card { padding: 12px 14px; border-radius: var(--radius); text-align: center; }
+        .stat-card .num { font-size: 22px; font-weight: 700; color: var(--primary); }
+        .stat-card .num.red { color: var(--danger); }
+        .stat-card .num.green { color: var(--success); }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; }
+        .result-item { border-radius: var(--radius); padding: 14px 18px; margin-bottom: 10px; border-left: 3px solid var(--primary); border: 1px solid var(--border); border-left-width: 3px; }
+        .result-item.plag { border-left-color: var(--danger); background: var(--danger-bg); }
+        .result-item.orig { border-left-color: var(--success); background: var(--success-bg); }
+        .result-item .top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+        .result-item .top .id { font-weight: 600; font-size: 14px; }
+        .result-item .top .score { font-weight: 700; font-size: 16px; }
+        .result-item .top .score.high { color: var(--danger); }
+        .result-item .top .score.low { color: var(--success); }
+        .result-item .detail { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+        .result-item .highlights { margin-top: 8px; padding: 8px 12px; background: var(--bg-input); border-radius: var(--radius); font-size: 13px; border: 1px solid var(--border); }
+        .result-item .highlights .hl { background: #ffd700; color: #161616; padding: 1px 4px; border-radius: 3px; font-weight: 600; }
+        [data-theme="dark"] .result-item .highlights .hl { background: #b8860b; color: #f4f4f4; }
+        .status-banner { padding: 12px 16px; border-radius: var(--radius); font-weight: 600; margin-bottom: 14px; border: 1px solid transparent; }
+        .status-banner.plag { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+        .status-banner.orig { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+        .turnitin-box { margin-top: 16px; padding: 16px 20px; border-radius: var(--radius); display: none; }
+        .turnitin-box.active { display: block; animation: fadeIn 0.3s ease; }
+        .turnitin-box .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .turnitin-box .label i { color: var(--primary); }
+        .turnitin-box .result { font-size: 14px; line-height: 1.8; color: var(--text); padding: 12px 16px; background: var(--bg-input); border-radius: var(--radius); border-left: 3px solid var(--primary); }
+        .turnitin-box .btn-group-copy { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+        .manage-result { margin-top: 12px; padding: 10px 14px; border-radius: var(--radius); border: 1px solid transparent; display: none; }
+        .manage-result.show { display: block; }
+        .manage-result.success { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+        .manage-result.error { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: var(--radius); color: #fff; font-weight: 500; font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; max-width: 420px; background: var(--primary); }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
+        .toast.info { background: var(--primary); }
+        .footer { text-align: center; padding: 20px 0 8px; border-top: 1px solid var(--border); margin-top: 20px; color: var(--text-muted); font-size: 13px; }
+        .footer .brand { font-weight: 600; color: var(--primary); }
+        .faq-section { margin-top: 16px; text-align: left; max-width: 600px; margin: 16px auto 0; }
+        .faq-section h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        .faq-section details { margin-bottom: 6px; padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-card); }
+        .faq-section details summary { cursor: pointer; font-weight: 500; color: var(--text); list-style: none; font-size: 13px; }
+        .faq-section details summary::before { content: '› '; font-weight: 700; color: var(--primary); }
+        .faq-section details[open] summary::before { content: '▼ '; }
+        .faq-section details p { font-size: 13px; color: var(--text-secondary); padding: 6px 0 2px 20px; }
+        .loading { display: none !important; align-items: center; gap: 10px; margin-top: 12px; color: var(--text-secondary); font-size: 13px; }
+        .loading.active { display: flex !important; }
+        .loading .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ============================================================
+           ELEGANT ANIMATIONS (CSS fallback + anime.js enhancement)
+           ============================================================ */
+        /* CSS fade-in fallback — always visible even if anime.js fails */
+        .header, .tabs, .panel.active, .footer {
+            animation: cssFadeIn 0.5s ease forwards;
+        }
+        .tab-btn { animation: cssFadeInUp 0.4s ease forwards; }
+        .panel-header, .form-group, .btn-group, .drop-zone, .switch-wrap, .form-row {
+            animation: cssFadeInUp 0.4s ease forwards;
+        }
+        @keyframes cssFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes cssFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* anime.js will override these CSS animations when loaded */
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width:640px) {
+            body { padding: 10px; }
+            .header { flex-direction: column; text-align: center; padding: 12px 16px; }
+            .header-right { justify-content: center; margin-left: 0; }
+            .panel { padding: 18px 16px; }
+            .form-row { grid-template-columns: 1fr; }
+            .manage-grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; justify-content: center; }
+            .tab-btn { font-size: 12px; padding: 8px 14px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .app { grid-template-rows: auto auto 1fr auto; }
+            .footer { margin-top: auto; padding: 16px 0 8px; }
+            .faq-section { margin: 12px auto 0; padding: 0 4px; }
+            .badge-cloudflare { font-size: 10px; padding: 3px 10px; }
+            .lang-selector { font-size: 10px; padding: 3px 8px; }
+            .header-right { gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 5 L85 20 V50 C85 75 65 90 50 95 C35 90 15 75 15 50 V20 Z" fill="white"/><text x="50" y="68" font-size="42" font-weight="bold" fill="#0f62fe" text-anchor="middle" font-family="Arial">O</text></svg></div>
+            <span>OkongzINC<span style="color:var(--text-secondary);font-weight:400;"> Checker</span></span>
+            <span class="logo-sub">v7.0 · Ado</span>
+        </div>
+        <div class="header-right">
+            <span class="badge-status"><span class="dot"></span> <span id="status-text">Online</span></span>
+            <span class="badge-dims"><i class="fas fa-database"></i> 1024 dims</span>
+            <span class="badge-cloudflare"><i class="fas fa-cloud"></i> Cloudflare</span>
+            <select class="lang-selector" id="lang-selector" aria-label="Language">
+                <option value="id">🇮🇩 Indonesia</option>
+                <option value="en">🇬🇧 English</option>
+                <!-- Hanya tampilkan bahasa yg punya terjemahan lengkap (id, en) -->
+                <!-- Opsi ja/zh/su/jv/bet dihapus krn TRANSLATIONS belum ada → misleading fallback -->
+            </select>
+            <button class="btn-icon" id="themeToggle" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    TABS
+    ============================================================ -->
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="check"><i class="fas fa-file-alt"></i> <span data-i18n="tab-check">Cek Teks</span></button>
+        <button class="tab-btn" data-tab="upload"><i class="fas fa-cloud-upload-alt"></i> <span data-i18n="tab-upload">Upload</span></button>
+        <button class="tab-btn" data-tab="batch"><i class="fas fa-layer-group"></i> <span data-i18n="tab-batch">Batch</span></button>
+        <button class="tab-btn" data-tab="report"><i class="fas fa-chart-bar"></i> <span data-i18n="tab-report">Report</span></button>
+        <button class="tab-btn" data-tab="manage"><i class="fas fa-database"></i> <span data-i18n="tab-manage">Manage</span></button>
+        <button class="tab-btn" data-tab="history"><i class="fas fa-history"></i> <span data-i18n="tab-history">History</span></button>
+        <button class="tab-btn" data-tab="summarize"><i class="fas fa-compress-arrows-alt"></i> <span data-i18n="tab-summarize">Summarize</span></button>
+        <button class="tab-btn" data-tab="aidetect"><i class="fas fa-robot"></i> <span data-i18n="tab-aidetect">AI Detect</span></button>
+    </nav>
+
+    <!-- ============================================================
+    PANEL CEK TEKS — TANPA TROUBLESHOOT
+    ============================================================ -->
+    <section class="panel active" id="panel-check">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-file-alt"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="check-title">Cek Plagiarisme</div>
+                <div class="panel-sub" data-i18n="check-sub">Masukkan teks untuk dicek kemiripannya dengan model bge-large (1024 dims).</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-edit"></i> <span data-i18n="check-label-text">Teks</span></label>
+            <textarea id="checkText" placeholder="Tempel teks di sini... minimal 10 karakter" data-i18n-placeholder="check-placeholder"></textarea>
+            <div class="counter">
+                <span id="wordCount"><span id="wordCountNum">0</span> <span data-i18n="word-unit">kata</span></span>
+                <span id="charCount"><span id="charCountNum">0</span> <span data-i18n="char-unit">karakter</span></span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-list"></i> <span data-i18n="check-topk-label">Top K</span></label>
+                <input type="number" id="checkTopk" value="50" min="1" max="100" />
+                <span style="font-size:11px;color:var(--text-muted);" data-i18n="check-topk-hint">Jumlah hasil</span>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-sliders-h"></i> <span data-i18n="check-threshold-label">Threshold</span></label>
+                <input type="number" id="checkThreshold" value="0.75" min="0.1" max="0.99" step="0.05" />
+                <span style="font-size:11px;color:var(--text-muted);" data-i18n="check-threshold-hint">Batas deteksi</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-flag"></i> <span data-i18n="check-mode-label">Mode Parafrase</span></label>
+            <select id="paraphraseMode">
+                <option value="standard" data-i18n="mode-standard">Standard</option>
+                <option value="fluency" data-i18n="mode-fluency">Fluency</option>
+                <option value="humanize" data-i18n="mode-humanize">Humanize</option>
+                <option value="formal" data-i18n="mode-formal">Formal</option>
+                <option value="academic" data-i18n="mode-academic">Academic</option>
+                <option value="simple" data-i18n="mode-simple">Simple</option>
+                <option value="creative" data-i18n="mode-creative">Creative</option>
+                <option value="expand" data-i18n="mode-expand">Expand</option>
+                <option value="shorten" data-i18n="mode-shorten">Shorten</option>
+                <option value="stealth">Stealth (Bypass AI)</option>
+                <option value="ultra">Ultra v7.0 (Pipeline)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-percentage"></i> <span data-i18n="synonym-label">Synonym Level</span> · <strong id="synonymValue">50</strong>%</label>
+            <input type="range" id="synonymLevel" min="0" max="100" value="50" oninput="$('synonymValue').textContent=this.value" />
+            <span style="font-size:11px;color:var(--text-muted);" data-i18n="synonym-hint">0 = minimal sinonim, 100 = agresif ganti kata</span>
+        </div>
+
+        <div class="form-group" id="passesGroup" style="display:none;">
+            <label><i class="fas fa-layer-group"></i> <span data-i18n="passes-label">Jumlah Pass (Multi-Pass)</span></label>
+            <input type="range" id="paraphrasePasses" min="1" max="5" value="3" oninput="$('passesValue').textContent=this.value" />
+            <span style="font-size:11px;color:var(--text-muted);"><span id="passesValue">3</span> × pass • <span data-i18n="passes-hint">lebih banyak = lebih radikal</span></span>
+        </div>
+
+        <div class="form-group" id="candidatesGroup" style="display:none;">
+            <label><i class="fas fa-users"></i> <span data-i18n="candidates-label">Jumlah Kandidat (Best-of-N)</span></label>
+            <input type="range" id="paraphraseCandidates" min="1" max="3" value="2" oninput="$('candidatesValue').textContent=this.value" />
+            <span style="font-size:11px;color:var(--text-muted);"><span id="candidatesValue">2</span> kandidat • <span data-i18n="candidates-hint">persona berbeda, pilih yg paling natural</span></span>
+        </div>
+
+        <div class="switch-wrap">
+            <input type="checkbox" id="checkLlm" checked />
+            <label for="checkLlm" data-i18n="check-llm-label">Deteksi Parafrase (LLM)</label>
+        </div>
+
+        <!-- Turnstile CAPTCHA -->
+        <div class="form-group" style="margin:12px 0;">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAD0mUQyfiouggi2W"></div>
+        </div>
+
+        <!-- ===== TOMBOL ===== -->
+        <div class="btn-group">
+            <button class="btn btn-primary" id="btnCheck"><i class="fas fa-shield-alt"></i> <span data-i18n="btn-check">Cek Sekarang</span></button>
+            <button class="btn btn-secondary" id="btnTurnitin"><i class="fas fa-pen-fancy"></i> <span data-i18n="btn-turnitin">Turnitin</span></button>
+            <button class="btn btn-outline" id="btnClear"><i class="fas fa-eraser"></i> <span data-i18n="btn-clear">Bersihkan</span></button>
+        </div>
+
+        <div class="loading" id="loadingCheck"><div class="spinner"></div> <span data-i18n="loading-check">Memproses...</span></div>
+
+        <div class="turnitin-box" id="turnitinBox">
+            <div class="label"><i class="fas fa-pen-fancy"></i> <span data-i18n="turnitin-label">Hasil Turnitin</span></div>
+            <div class="result" id="turnitinResult"></div>
+            <div class="btn-group-copy">
+                <button class="btn btn-outline btn-sm" id="copyTurnitinResult"><i class="fas fa-copy"></i> <span data-i18n="btn-copy">Copy</span></button>
+                <button class="btn btn-outline btn-sm" id="exportTxtBtn" onclick="exportResult('txt')"><i class="fas fa-file-alt"></i> TXT</button>
+                <button class="btn btn-outline btn-sm" id="exportMdBtn" onclick="exportResult('md')"><i class="fab fa-markdown"></i> MD</button>
+            </div>
+        </div>
+
+        <div class="results-wrap" id="resultsCheck"></div>
+        <div class="btn-group" id="exportCheckGroup" style="display:none;margin-top:12px;">
+            <button class="btn btn-outline btn-sm" onclick="exportCheckResult('txt')"><i class="fas fa-file-alt"></i> Export TXT</button>
+            <button class="btn btn-outline btn-sm" onclick="exportCheckResult('md')"><i class="fab fa-markdown"></i> Export MD</button>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    PANEL UPLOAD (ringkas)
+    ============================================================ -->
+    <section class="panel" id="panel-upload">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="upload-title">Upload File</div>
+                <div class="panel-sub" data-i18n="upload-sub">Support: TXT, PDF, DOCX, HTML, JSON</div>
+            </div>
+        </div>
+        <div class="drop-zone" id="dropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <div style="font-weight:500;" data-i18n="drop-hint">Klik atau drop file di sini</div>
+            <div class="hint">Support: <strong>TXT</strong> · <strong>PDF</strong> · <strong>DOCX</strong> · <strong>HTML</strong> · <strong>JSON</strong></div>
+            <input type="file" id="fileInput" accept=".txt,.pdf,.docx,.html,.json" style="display:none;" multiple />
+        </div>
+        <div class="file-list" id="fileList"></div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-list"></i> <span data-i18n="upload-topk-label">Top K</span></label>
+                <input type="number" id="uploadTopk" value="50" min="1" max="100" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-sliders-h"></i> <span data-i18n="upload-threshold-label">Threshold</span></label>
+                <input type="number" id="uploadThreshold" value="0.75" min="0.1" max="0.99" step="0.05" />
+            </div>
+        </div>
+        <div class="form-group" style="margin:12px 0;"><div class="cf-turnstile" data-sitekey="0x4AAAAAAD0mUQyfiouggi2W"></div></div>
+        <button class="btn btn-primary" id="btnUpload"><i class="fas fa-upload"></i> <span data-i18n="btn-upload">Upload & Cek</span></button>
+        <div class="loading" id="loadingUpload"><div class="spinner"></div> <span data-i18n="loading-upload">Memproses...</span></div>
+        <div class="results-wrap" id="resultsUpload"></div>
+    </section>
+
+    <!-- ============================================================
+    PANEL BATCH (ringkas)
+    ============================================================ -->
+    <section class="panel" id="panel-batch">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-layer-group"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="batch-title">Batch Check</div>
+                <div class="panel-sub" data-i18n="batch-sub">Pisahkan setiap teks dengan baris baru.</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-edit"></i> <span data-i18n="batch-label-text">Teks</span></label>
+            <textarea id="batchText" placeholder="Teks 1&#10;Teks 2&#10;Teks 3" style="min-height:120px;"></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-list"></i> <span data-i18n="batch-topk-label">Top K</span></label>
+                <input type="number" id="batchTopk" value="30" min="1" max="100" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-sliders-h"></i> <span data-i18n="batch-threshold-label">Threshold</span></label>
+                <input type="number" id="batchThreshold" value="0.75" min="0.1" max="0.99" step="0.05" />
+            </div>
+        </div>
+        <div class="form-group" style="margin:12px 0;"><div class="cf-turnstile" data-sitekey="0x4AAAAAAD0mUQyfiouggi2W"></div></div>
+        <button class="btn btn-primary" id="btnBatch"><i class="fas fa-play"></i> <span data-i18n="btn-batch">Cek Semua</span></button>
+        <div class="loading" id="loadingBatch"><div class="spinner"></div> <span data-i18n="loading-batch">Memproses batch...</span></div>
+        <div class="results-wrap" id="resultsBatch"></div>
+    </section>
+
+    <!-- ============================================================
+    PANEL REPORT (ringkas)
+    ============================================================ -->
+    <section class="panel" id="panel-report">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-chart-bar"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="report-title">Generate Laporan</div>
+                <div class="panel-sub" data-i18n="report-sub">Buat laporan HTML yang bisa dibuka di browser</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-edit"></i> <span data-i18n="report-label-text">Teks</span></label>
+            <textarea id="reportText" placeholder="Teks untuk dilaporkan..." style="min-height:120px;"></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-file-code"></i> <span data-i18n="report-format-label">Format</span></label>
+                <select id="reportFormat">
+                    <option value="html" selected data-i18n="format-html">HTML Report</option>
+                    <option value="json" data-i18n="format-json">JSON Data</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group" style="margin:12px 0;"><div class="cf-turnstile" data-sitekey="0x4AAAAAAD0mUQyfiouggi2W"></div></div>
+        <button class="btn btn-primary" id="btnReport"><i class="fas fa-download"></i> <span data-i18n="btn-report">Generate & Download</span></button>
+        <div class="loading" id="loadingReport"><div class="spinner"></div> <span data-i18n="loading-report">Membuat laporan...</span></div>
+    </section>
+
+    <!-- ============================================================
+    PANEL MANAGE (ringkas)
+    ============================================================ -->
+    <section class="panel" id="panel-manage">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-database"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="manage-title">Kelola Database</div>
+                <div class="panel-sub" data-i18n="manage-sub">Tambah atau hapus dokumen referensi.</div>
+            </div>
+        </div>
+        <div class="manage-grid">
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> <span data-i18n="manage-id-label">ID</span></label>
+                <input type="text" id="manageId" placeholder="doc1" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-link"></i> <span data-i18n="manage-source-label">Sumber</span></label>
+                <input type="text" id="manageSource" placeholder="manual / URL" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-edit"></i> <span data-i18n="manage-text-label">Teks</span></label>
+            <textarea id="manageText" placeholder="Isi dokumen referensi..." style="min-height:100px;"></textarea>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-success" id="btnAddDoc"><i class="fas fa-plus"></i> <span data-i18n="btn-add">Tambah</span></button>
+            <button class="btn btn-danger" id="btnDeleteDoc"><i class="fas fa-trash"></i> <span data-i18n="btn-delete">Hapus</span></button>
+        </div>
+        <div class="loading" id="loadingManage"><div class="spinner"></div> <span data-i18n="loading-manage">Memproses...</span></div>
+        <div class="manage-result" id="manageResult"></div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PANEL: HISTORY                                                -->
+    <!-- ============================================================ -->
+    <section class="panel" id="panel-history">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-history"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="history-title">Riwayat Aktivitas</div>
+                <div class="panel-sub" data-i18n="history-sub">30 hari terakhir. Auto-expire.</div>
+            </div>
+        </div>
+        <div class="btn-group" style="margin-bottom:16px;">
+            <button class="btn btn-primary" id="btnRefreshHistory"><i class="fas fa-sync"></i> <span data-i18n="history-refresh">Muat Ulang</span></button>
+            <button class="btn btn-outline" id="btnClearHistory"><i class="fas fa-trash"></i> <span data-i18n="history-clear">Hapus Semua</span></button>
+        </div>
+        <div class="loading" id="loadingHistory"><div class="spinner"></div> <span data-i18n="loading-history">Memuat...</span></div>
+        <div id="historyList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </section>
+
+    <!-- ============================================================
+    PANEL SUMMARIZE — QuillBot-style summarizer
+    ============================================================ -->
+    <section class="panel" id="panel-summarize">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="summarize-title">Ringkas Teks</div>
+                <div class="panel-sub" data-i18n="summarize-sub">Ringkas teks panjang jadi poin utama.</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-edit"></i> <span data-i18n="summarize-label-text">Teks</span></label>
+            <textarea id="summarizeText" rows="8" placeholder="Tempel teks panjang di sini... minimal 50 karakter"></textarea>
+            <div class="input-info"><span id="summarizeWords">0</span> <span data-i18n="word-unit">kata</span> · <span id="summarizeChars">0</span> <span data-i18n="char-unit">karakter</span></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-ruler"></i> <span data-i18n="summarize-length-label">Panjang</span></label>
+                <select id="summarizeLength">
+                    <option value="short" data-i18n="summarize-short">Short (2-3 kalimat)</option>
+                    <option value="medium" selected data-i18n="summarize-medium">Medium (4-6 kalimat)</option>
+                    <option value="long" data-i18n="summarize-long">Long (7-10 kalimat)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-list"></i> <span data-i18n="summarize-format-label">Format</span></label>
+                <select id="summarizeFormat">
+                    <option value="paragraph" selected data-i18n="summarize-paragraph">Paragraph</option>
+                    <option value="bullets" data-i18n="summarize-bullets">Bullet Points</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group" style="margin:12px 0;"><div class="cf-turnstile" data-sitekey="0x4AAAAAAD0mUQyfiouggi2W"></div></div>
+        <div class="btn-group">
+            <button class="btn btn-primary" id="btnSummarize"><i class="fas fa-compress-arrows-alt"></i> <span data-i18n="btn-summarize">Ringkas</span></button>
+            <button class="btn btn-outline" id="btnClearSummarize"><i class="fas fa-eraser"></i> <span data-i18n="btn-clear">Bersihkan</span></button>
+        </div>
+        <div class="loading" id="loadingSummarize"><div class="spinner"></div> <span data-i18n="loading-summarize">Meringkas...</span></div>
+        <div class="turnitin-box" id="summarizeBox" style="display:none;">
+            <div class="label"><i class="fas fa-compress-arrows-alt"></i> <span data-i18n="summarize-result-label">Hasil Ringkasan</span></div>
+            <div class="result" id="summarizeResult"></div>
+            <div class="btn-group-copy">
+                <button class="btn btn-outline btn-sm" id="copySummarizeResult"><i class="fas fa-copy"></i> <span data-i18n="btn-copy">Copy</span></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    PANEL AI DETECT — QuillBot AI Detector equivalent
+    ============================================================ -->
+    <section class="panel" id="panel-aidetect">
+        <div class="panel-header">
+            <div class="panel-icon"><i class="fas fa-robot"></i></div>
+            <div>
+                <div class="panel-title" data-i18n="aidetect-title">Deteksi Konten AI</div>
+                <div class="panel-sub" data-i18n="aidetect-sub">Cek apakah teks ditulis AI atau manusia.</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-edit"></i> <span data-i18n="aidetect-label-text">Teks</span></label>
+            <textarea id="aiDetectText" rows="8" placeholder="Tempel teks untuk dicek... minimal 50 karakter"></textarea>
+            <div class="input-info"><span id="aiDetectWords">0</span> <span data-i18n="word-unit">kata</span> · <span id="aiDetectChars">0</span> <span data-i18n="char-unit">karakter</span></div>
+        </div>
+        <div class="form-group" style="margin:12px 0;"><div class="cf-turnstile" data-sitekey="0x4AAAAAAD0mUQyfiouggi2W"></div></div>
+        <div class="btn-group">
+            <button class="btn btn-primary" id="btnAiDetect"><i class="fas fa-robot"></i> <span data-i18n="btn-aidetect">Deteksi AI</span></button>
+            <button class="btn btn-outline" id="btnClearAiDetect"><i class="fas fa-eraser"></i> <span data-i18n="btn-clear">Bersihkan</span></button>
+        </div>
+        <div class="loading" id="loadingAiDetect"><div class="spinner"></div> <span data-i18n="loading-aidetect">Menganalisis...</span></div>
+        <div class="results-wrap" id="resultsAiDetect"></div>
+    </section>
+
+    <!-- ============================================================
+    FOOTER
+    ============================================================ -->
+    <footer class="footer">
+        <div>Powered by <span class="brand">OkongzINC</span></div>
+        <div style="font-size:11px;margin-top:4px;opacity:0.6;">&copy; 2026 OkongzINC Checker v7.0 · Ado Edition</div>
+        <div class="faq-section">
+            <h4 data-i18n="faq-title">FAQ</h4>
+            <details><summary data-i18n="faq-q1">Apa itu OkongzINC Checker?</summary><p data-i18n="faq-a1">Alat OkongzINC utk cek plagiarisme & turnitin dgn pipeline 4-stage (Ultra v7.0), AI embedding bge-large 1024 dims.</p></details>
+            <details><summary data-i18n="faq-q2">Apakah gratis?</summary><p data-i18n="faq-a2">Ya, 100% gratis tanpa biaya atau login.</p></details>
+            <details><summary data-i18n="faq-q3">Apa itu Turnitin?</summary><p data-i18n="faq-a3">Fitur parafrase dengan 11 mode + Synonym Level slider. Lihat dropdown Mode Parafrase untuk daftar lengkap.</p></details>
+            <details><summary data-i18n="faq-q4">File apa saja yang bisa diupload?</summary><p data-i18n="faq-a4">Support: TXT, PDF, DOCX, HTML, JSON.</p></details>
+            <details><summary data-i18n="faq-q5">Apa itu AI Detect?</summary><p data-i18n="faq-a5">Fitur deteksi konten AI. Cek apakah teks ditulis AI atau manusia.</p></details>
+        </div>
+    </footer>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+SCRIPT — LENGKAP, TANPA TROUBLESHOOT
+============================================================ -->
+<script>
+    // ============================================================
+    // TRANSLATIONS (ringkas)
+    // ============================================================
+    const TRANSLATIONS = {
+        id: {
+            'status-online': 'Online', 'tab-check': 'Cek Teks', 'tab-upload': 'Upload',
+            'tab-batch': 'Batch', 'tab-report': 'Report', 'tab-manage': 'Manage',
+            'tab-summarize': 'Ringkas', 'tab-aidetect': 'AI Detect',
+            'synonym-label': 'Synonym Level', 'synonym-hint': '0 = minimal sinonim, 100 = agresif ganti kata',
+            'mode-expand': 'Expand', 'mode-shorten': 'Shorten',
+            'summarize-title': 'Ringkas Teks', 'summarize-sub': 'Ringkas teks panjang jadi poin utama.',
+            'summarize-label-text': 'Teks', 'summarize-length-label': 'Panjang', 'summarize-format-label': 'Format',
+            'summarize-short': 'Short (2-3 kalimat)', 'summarize-medium': 'Medium (4-6 kalimat)', 'summarize-long': 'Long (7-10 kalimat)',
+            'summarize-paragraph': 'Paragraph', 'summarize-bullets': 'Bullet Points',
+            'btn-summarize': 'Ringkas', 'loading-summarize': 'Meringkas...', 'summarize-result-label': 'Hasil Ringkasan',
+            'aidetect-title': 'Deteksi Konten AI', 'aidetect-sub': 'Cek apakah teks ditulis AI atau manusia.',
+            'aidetect-label-text': 'Teks', 'btn-aidetect': 'Deteksi AI', 'loading-aidetect': 'Menganalisis...',
+            'check-title': 'Cek Plagiarisme', 'check-sub': 'Masukkan teks untuk dicek kemiripannya dengan model bge-large (1024 dims).',
+            'check-label-text': 'Teks', 'check-placeholder': 'Tempel teks di sini... minimal 10 karakter',
+            'word-unit': 'kata', 'char-unit': 'karakter',
+            'check-topk-label': 'Top K', 'check-topk-hint': 'Jumlah hasil',
+            'check-threshold-label': 'Threshold', 'check-threshold-hint': 'Batas deteksi',
+            'check-mode-label': 'Mode Parafrase',
+            'mode-standard': 'Standard', 'mode-fluency': 'Fluency', 'mode-humanize': 'Humanize',
+            'mode-formal': 'Formal', 'mode-academic': 'Academic', 'mode-simple': 'Simple', 'mode-creative': 'Creative',
+            'check-llm-label': 'Deteksi Parafrase (LLM)',
+            'btn-check': 'Cek Sekarang', 'btn-turnitin': 'Turnitin', 'btn-clear': 'Bersihkan',
+            'loading-check': 'Memproses...', 'turnitin-label': 'Hasil Turnitin', 'btn-copy': 'Copy',
+            'upload-title': 'Upload File', 'upload-sub': 'Support: TXT, PDF, DOCX, HTML, JSON',
+            'drop-hint': 'Klik atau drop file di sini', 'upload-topk-label': 'Top K', 'upload-threshold-label': 'Threshold',
+            'btn-upload': 'Upload & Cek', 'loading-upload': 'Memproses...',
+            'batch-title': 'Batch Check', 'batch-sub': 'Pisahkan setiap teks dengan baris baru.',
+            'batch-label-text': 'Teks', 'batch-topk-label': 'Top K', 'batch-threshold-label': 'Threshold',
+            'btn-batch': 'Cek Semua', 'loading-batch': 'Memproses batch...',
+            'report-title': 'Generate Laporan', 'report-sub': 'Buat laporan HTML yang bisa dibuka di browser',
+            'report-label-text': 'Teks', 'report-format-label': 'Format',
+            'format-html': 'HTML Report', 'format-json': 'JSON Data',
+            'btn-report': 'Generate & Download', 'loading-report': 'Membuat laporan...',
+            'manage-title': 'Kelola Database', 'manage-sub': 'Tambah atau hapus dokumen referensi.',
+            'manage-id-label': 'ID', 'manage-source-label': 'Sumber', 'manage-text-label': 'Teks',
+            'btn-add': 'Tambah', 'btn-delete': 'Hapus', 'loading-manage': 'Memproses...',
+            'faq-title': 'FAQ',
+            'faq-q1': 'Apa itu OkongzINC Checker?', 'faq-a1': 'Alat OkongzINC utk cek plagiarisme & turnitin dgn pipeline 4-stage (Ultra v7.0), AI embedding bge-large 1024 dims.',
+            'faq-q2': 'Apakah gratis?', 'faq-a2': 'Ya, 100% gratis tanpa biaya atau login.',
+            'faq-q3': 'Apa itu Turnitin?', 'faq-a3': 'Fitur parafrase dengan 11 mode: Standard, Fluency, Humanize, Formal, Academic, Simple, Creative, Expand, Shorten, Stealth (bypass AI), dan Ultra v7.0 (pipeline 4-stage). Dilengkapi Synonym Level slider (0-100).',
+ 'faq-q4': 'File apa saja yang bisa diupload?', 'faq-a4': 'Support: TXT, PDF, DOCX, HTML, JSON.',
+ 'faq-q5': 'Apa itu AI Detect?', 'faq-a5': 'Fitur deteksi konten AI. Cek apakah teks ditulis AI atau manusia dengan scoring probabilistik (LLM + burstiness + pattern matching).'
+ },
+        en: {
+            'status-online': 'Online', 'tab-check': 'Check Text', 'tab-upload': 'Upload',
+            'tab-batch': 'Batch', 'tab-report': 'Report', 'tab-manage': 'Manage',
+            'tab-summarize': 'Summarize', 'tab-aidetect': 'AI Detect',
+            'synonym-label': 'Synonym Level', 'synonym-hint': '0 = minimal synonyms, 100 = aggressive word replacement',
+            'mode-expand': 'Expand', 'mode-shorten': 'Shorten',
+            'summarize-title': 'Summarize Text', 'summarize-sub': 'Condense long text into key points.',
+            'summarize-label-text': 'Text', 'summarize-length-label': 'Length', 'summarize-format-label': 'Format',
+            'summarize-short': 'Short (2-3 sentences)', 'summarize-medium': 'Medium (4-6 sentences)', 'summarize-long': 'Long (7-10 sentences)',
+            'summarize-paragraph': 'Paragraph', 'summarize-bullets': 'Bullet Points',
+            'btn-summarize': 'Summarize', 'loading-summarize': 'Summarizing...', 'summarize-result-label': 'Summary Result',
+            'aidetect-title': 'AI Content Detection', 'aidetect-sub': 'Check if text is AI or human-written.',
+            'aidetect-label-text': 'Text', 'btn-aidetect': 'Detect AI', 'loading-aidetect': 'Analyzing...',
+            'check-title': 'Plagiarism Check', 'check-sub': 'Enter text to check similarity with bge-large model (1024 dims).',
+            'check-label-text': 'Text', 'check-placeholder': 'Paste text here... at least 10 characters',
+            'word-unit': 'words', 'char-unit': 'characters',
+            'check-topk-label': 'Top K', 'check-topk-hint': 'Number of results',
+            'check-threshold-label': 'Threshold', 'check-threshold-hint': 'Detection threshold',
+            'check-mode-label': 'Paraphrase Mode',
+            'mode-standard': 'Standard', 'mode-fluency': 'Fluency', 'mode-humanize': 'Humanize',
+            'mode-formal': 'Formal', 'mode-academic': 'Academic', 'mode-simple': 'Simple', 'mode-creative': 'Creative',
+            'check-llm-label': 'Paraphrase Detection (LLM)',
+            'btn-check': 'Check Now', 'btn-turnitin': 'Turnitin', 'btn-clear': 'Clear',
+            'loading-check': 'Processing...', 'turnitin-label': 'Turnitin Result', 'btn-copy': 'Copy',
+            'upload-title': 'Upload File', 'upload-sub': 'Support: TXT, PDF, DOCX, HTML, JSON',
+            'drop-hint': 'Click or drop file here', 'upload-topk-label': 'Top K', 'upload-threshold-label': 'Threshold',
+            'btn-upload': 'Upload & Check', 'loading-upload': 'Processing...',
+            'batch-title': 'Batch Check', 'batch-sub': 'Separate each text with a new line.',
+            'batch-label-text': 'Text', 'batch-topk-label': 'Top K', 'batch-threshold-label': 'Threshold',
+            'btn-batch': 'Check All', 'loading-batch': 'Processing batch...',
+            'report-title': 'Generate Report', 'report-sub': 'Generate HTML report viewable in browser',
+            'report-label-text': 'Text', 'report-format-label': 'Format',
+            'format-html': 'HTML Report', 'format-json': 'JSON Data',
+            'btn-report': 'Generate & Download', 'loading-report': 'Creating report...',
+            'manage-title': 'Manage Database', 'manage-sub': 'Add or remove reference documents.',
+            'manage-id-label': 'ID', 'manage-source-label': 'Source', 'manage-text-label': 'Text',
+            'btn-add': 'Add', 'btn-delete': 'Delete', 'loading-manage': 'Processing...',
+            'faq-title': 'FAQ',
+            'faq-q1': 'What is OkongzINC Checker?', 'faq-a1': 'OkongzINC tool for plagiarism & Turnitin checking with 4-stage Ultra pipeline, bge-large 1024 dims.',
+            'faq-q2': 'Is it free?', 'faq-a2': 'Yes, 100% free with no fees or login required.',
+            'faq-q3': 'What is Turnitin?', 'faq-a3': 'A paraphrasing feature with 11 modes: Standard, Fluency, Humanize, Formal, Academic, Simple, Creative, Expand, Shorten, Stealth (bypass AI), and Ultra v7.0 (4-stage pipeline). Includes Synonym Level slider (0-100).',
+ 'faq-q4': 'What files can be uploaded?', 'faq-a4': 'Support: TXT, PDF, DOCX, HTML, JSON.',
+ 'faq-q5': 'What is AI Detect?', 'faq-a5': 'AI content detection feature. Check if text is AI or human-written with probabilistic scoring (LLM + burstiness + pattern matching).'
+ }
+        // tambahkan ja, zh, su, jv, bet jika perlu — untuk ringkas saya tulis id dan en saja
+    };
+
+    let currentLang = 'id';
+    function applyLanguage(lang) {
+        const t = TRANSLATIONS[lang] || TRANSLATIONS['id'];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key] !== undefined) el.textContent = t[key];
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (t[key] !== undefined) el.placeholder = t[key];
+        });
+        const statusEl = document.getElementById('status-text');
+        if (statusEl && t['status-online']) statusEl.textContent = t['status-online'];
+        localStorage.setItem('pc-lang', lang);
+        currentLang = lang;
+    }
+    const savedLang = localStorage.getItem('pc-lang') || 'id';
+    document.getElementById('lang-selector').value = savedLang;
+    applyLanguage(savedLang);
+    document.getElementById('lang-selector').addEventListener('change', function() { applyLanguage(this.value); });
+
+    // ============================================================
+    // API & UTILITY
+    // ============================================================
+    const API_URL = 'https://plagiarism-checker.claudeh1761.workers.dev';
+    const $ = id => document.getElementById(id);
+    const toast = $('toast');
+    // Escape HTML utk cegah XSS saat insert data backend/user ke innerHTML
+    function escapeHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function showToast(msg, type='info') {
+        toast.textContent = msg;
+        toast.className = 'toast ' + type + ' show';
+        clearTimeout(toast._hide);
+        toast._hide = setTimeout(() => toast.classList.remove('show'), 3800);
+    }
+    // Ambil token Turnstile dari widget aktif (panel yg visible)
+    function getTurnstileToken() {
+        // Cari widget turnstile di panel aktif
+        const activePanel = document.querySelector('.panel.active');
+        const widget = activePanel ? activePanel.querySelector('.cf-turnstile') : null;
+        if (widget) {
+            const id = widget.querySelector('input[name="cf-turnstile-response"]') ||
+                       document.querySelector('input[name="cf-turnstile-response"]');
+            return id ? id.value : '';
+        }
+        // Fallback: ambil token pertama yg ada
+        const anyToken = document.querySelector('input[name="cf-turnstile-response"]');
+        return anyToken ? anyToken.value : '';
+    }
+    async function apiCall(endpoint, body) {
+        // Sertakan turnstile token kalau ada
+        const token = getTurnstileToken();
+        if (token) body.turnstileToken = token;
+        const res = await fetch(API_URL + endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'HTTP '+res.status); }
+        return res.json();
+    }
+
+    // ============================================================
+    // COUNTER
+    // ============================================================
+    const checkText = $('checkText');
+    checkText.addEventListener('input', function() {
+        const text = this.value;
+        const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+        $('wordCountNum').textContent = words;
+        $('charCountNum').textContent = text.length;
+    });
+
+    // ============================================================
+    // RENDER RESULTS
+    // ============================================================
+    function renderResults(containerId, data) {
+        const container = $(containerId);
+        container.innerHTML = '';
+        container.classList.add('active');
+        if (!data || !data.matches || data.matches.length === 0) {
+            container.innerHTML = `<div class="result-item orig"><div class="top"><span class="id">${currentLang==='en'?'No similarity':'Tidak ada kemiripan'}</span><span class="score low">0%</span></div></div>`;
+            return;
+        }
+        const plagCount = data.matches.filter(m => m.isPlagiarized).length;
+        let html = `<div class="stats-grid">`;
+        html += `<div class="stat-card"><div class="num ${data.status==='PLAGIARISM_DETECTED'?'red':'green'}">${data.overall_similarity||'0%'}</div><div class="label">${currentLang==='en'?'Score':'Skor'}</div></div>`;
+        html += `<div class="stat-card"><div class="num red">${plagCount}</div><div class="label">${currentLang==='en'?'Plagiarism':'Plagiarisme'}</div></div>`;
+        html += `<div class="stat-card"><div class="num">${data.summary?.paraphrase_count||0}</div><div class="label">${currentLang==='en'?'Paraphrase':'Parafrase'}</div></div>`;
+        html += `<div class="stat-card"><div class="num green">${data.matches.length}</div><div class="label">${currentLang==='en'?'Total':'Total'}</div></div>`;
+        html += `</div>`;
+        const statusMsg = data.status === 'PLAGIARISM_DETECTED' ? (data.message || (currentLang==='en'?'Plagiarism Detected':'Plagiarisme Terdeteksi')) : (data.message || (currentLang==='en'?'Original':'Original'));
+        const statusClass = data.status === 'PLAGIARISM_DETECTED' ? 'plag' : 'orig';
+        html += `<div class="status-banner ${statusClass}">${escapeHtml(statusMsg)}</div>`;
+        data.matches.slice(0,10).forEach(m => {
+            const cls = m.isPlagiarized ? 'plag' : 'orig';
+            const scoreCls = m.isPlagiarized ? 'high' : 'low';
+            html += `<div class="result-item ${cls}"><div class="top"><span class="id">${escapeHtml(m.id||'unknown')}</span><span class="score ${scoreCls}">${escapeHtml(m.similarity||'0%')}</span></div></div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // ============================================================
+    // TABS
+    // ============================================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ============================================================
+    // DARK MODE
+    // ============================================================
+    const themeToggle = $('themeToggle');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // ============================================================
+    // CHECK
+    // ============================================================
+    $('btnCheck').addEventListener('click', async () => {
+        const text = checkText.value.trim();
+        if (text.length < 10) { showToast(currentLang==='en'?'Text must be at least 10 characters!':'Teks minimal 10 karakter!', 'error'); return; }
+        const loading = $('loadingCheck');
+        const btn = $('btnCheck');
+        btn.disabled = true;
+        loading.classList.add('active');
+        $('resultsCheck').classList.remove('active');
+        try {
+            const data = await apiCall('/check', {
+                text,
+                topK: parseInt($('checkTopk').value)||50,
+                threshold: parseFloat($('checkThreshold').value)||0.75,
+                useLLM: $('checkLlm').checked
+            });
+            lastCheckResult = data;
+            renderResults('resultsCheck', data);
+            $('exportCheckGroup').style.display = '';
+            showToast(currentLang==='en'?'Check complete.':'Pengecekan selesai.', 'success');
+            saveHistory('check', text, data, { threshold: $('checkThreshold').value, useLLM: $('checkLlm').checked });
+        } catch(err) { showToast('Error: '+err.message, 'error'); }
+        finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    // ============================================================
+    // TURNITIN v7.0 — Multi-Pass + Stealth
+    // ============================================================
+    // Toggle tampil passes/candidates saat mode berubah
+    $('paraphraseMode').addEventListener('change', function() {
+        $('passesGroup').style.display = (this.value === 'stealth') ? '' : 'none';
+        $('candidatesGroup').style.display = (this.value === 'ultra') ? '' : 'none';
+    });
+
+    $('btnTurnitin').addEventListener('click', async () => {
+        const text = checkText.value.trim();
+        if (text.length < 10) { showToast(currentLang==='en'?'Text must be at least 10 characters!':'Teks minimal 10 karakter!', 'error'); return; }
+        const btn = $('btnTurnitin');
+        const box = $('turnitinBox');
+        const result = $('turnitinResult');
+        const mode = $('paraphraseMode').value;
+        const isStealth = mode === 'stealth';
+        const isUltra = mode === 'ultra';
+        btn.disabled = true;
+        const label = isUltra ? (currentLang==='en'?'Ultra pipeline (4-stage)...':'Ultra diproses (4-stage)...')
+                    : isStealth ? (currentLang==='en'?'Stealth processing (multi-pass)...':'Stealth diproses (multi-pass)...')
+                    : (currentLang==='en'?'Processing AI...':'Memproses AI...');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + label;
+        try {
+            const payload = { text, mode, preserveMeaning: true, synonymLevel: parseInt($('synonymLevel').value) || 50 };
+            if (isStealth) payload.passes = parseInt($('paraphrasePasses').value) || 3;
+            if (isUltra) payload.n = parseInt($('paraphraseCandidates').value) || 2;
+            const data = await apiCall('/paraphrase', payload);
+            if (data.error) throw new Error(data.error);
+            lastTurnitinResult = data;
+            let out = data.paraphrased || (currentLang==='en'?'No paraphrase result.':'Tidak ada hasil parafrase.');
+            // Lampirkan info meta
+            const meta = [];
+            if (data.passes > 1) meta.push(`🔄 ${data.passes}× pass`);
+            if (isUltra && data.pipeline) {
+                const p = data.pipeline;
+                meta.push(`🚀 Ultra v7.0`);
+                if (p.stage1_scrub?.removed_count > 0) meta.push(`🧹 scrub: ${p.stage1_scrub.removed_count} AI tell`);
+                meta.push(`👥 ${p.stage2_candidates?.generated}/${p.stage2_candidates?.requested} kandidat (${(p.stage2_candidates?.personas_used||[]).join(', ')})`);
+                if (p.stage3_similarity) meta.push(`✓ persona: ${p.stage3_similarity.chosen_persona} (sim ${p.stage3_similarity.similarity_to_original})`);
+                if (p.stage4_dysfluency?.injected_count > 0) meta.push(`💉 ${p.stage4_dysfluency.injected_count} dysfluency`);
+            }
+            if (data.word_count_original && data.word_count_result) meta.push(`${data.word_count_original}→${data.word_count_result} kata`);
+            if (data.meaning_check && data.meaning_check.same_meaning !== null && data.meaning_check.same_meaning !== undefined) {
+                meta.push(data.meaning_check.same_meaning ? '✅ makna sama' : '⚠️ makna berubah');
+            }
+            if (data.pass_log && data.pass_log.length > 0) {
+                const okCount = data.pass_log.filter(p => p.status === 'ok').length;
+                meta.push(`${okCount}/${data.pass_log.length} pass OK`);
+            }
+            result.textContent = out + (meta.length ? '\n\n— ' + meta.join(' • ') + ' —' : '');
+            box.classList.add('active');
+            if (hasAnime) {
+                animate(box.querySelector('.result'), { opacity: [0, 1], translateY: [8, 0], duration: 400, ease: 'out(3)' });
+            }
+            showToast(currentLang==='en'?'Turnitin done!':'✅ Turnitin selesai!', 'success');
+            saveHistory('paraphrase', text, { status: 'PARAPHRASED', overall_similarity: null, matches: [], paraphrased: out, mode, passes: data.passes }, { mode, passes: data.passes, ultra_pipeline: isUltra });
+        } catch(err) {
+            showToast('❌ ' + err.message, 'error');
+            console.error('Turnitin Error:', err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-pen-fancy"></i> ' + (currentLang==='en'?'Turnitin':'Turnitin');
+        }
+    });
+
+    // ============================================================
+    // COPY
+    // ============================================================
+    $('copyTurnitinResult').addEventListener('click', () => {
+        const text = $('turnitinResult').textContent;
+        if (!text || text.trim() === '') { showToast(currentLang==='en'?'No result to copy.':'Tidak ada hasil untuk dicopy.', 'error'); return; }
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(currentLang==='en'?'Copied to clipboard.':'Hasil Turnitin dicopy ke clipboard.', 'success');
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+            showToast(currentLang==='en'?'Copied to clipboard.':'Hasil Turnitin dicopy ke clipboard.', 'success');
+        });
+    });
+
+    // ============================================================
+    // CLEAR
+    // ============================================================
+    $('btnClear').addEventListener('click', () => {
+        checkText.value = '';
+        $('resultsCheck').classList.remove('active');
+        $('resultsCheck').innerHTML = '';
+        $('turnitinBox').classList.remove('active');
+        $('turnitinResult').textContent = '';
+        $('wordCountNum').textContent = '0';
+        $('charCountNum').textContent = '0';
+        showToast(currentLang==='en'?'Form cleared.':'Form dibersihkan.', 'info');
+    });
+
+    // ============================================================
+    // UPLOAD
+    // ============================================================
+    const dropZone = $('dropZone');
+    const fileInput = $('fileInput');
+    const fileList = $('fileList');
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+        fileList.innerHTML = '';
+        [...fileInput.files].forEach(f => {
+            fileList.innerHTML += `<div class="file-item"><i class="fas fa-file"></i><span>${escapeHtml(f.name)}</span><span style="color:var(--text-muted);font-size:12px;margin-left:auto;">${(f.size/1024).toFixed(1)} KB</span></div>`;
+        });
+    });
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = 'var(--primary)';
+            dropZone.style.background = 'var(--primary-light)';
+        });
+    });
+    ['dragleave', 'dragend'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '';
+            dropZone.style.background = '';
+        });
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.style.borderColor = '';
+        dropZone.style.background = '';
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+    $('btnUpload').addEventListener('click', async () => {
+        const files = fileInput.files;
+        if (!files || files.length === 0) { showToast(currentLang==='en'?'Select a file!':'Pilih file!', 'error'); return; }
+        const loading = $('loadingUpload');
+        const btn = $('btnUpload');
+        btn.disabled = true;
+        loading.classList.add('active');
+        $('resultsUpload').classList.remove('active');
+        try {
+            const formData = new FormData();
+            for (const f of files) formData.append('file', f);
+            formData.append('topK', $('uploadTopk').value || '50');
+            formData.append('threshold', $('uploadThreshold').value || '0.75');
+            const tsToken = getTurnstileToken();
+            if (tsToken) formData.append('turnstileToken', tsToken);
+            const res = await fetch(API_URL + '/upload', { method: 'POST', body: formData });
+            if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'HTTP '+res.status); }
+            const data = await res.json();
+            renderResults('resultsUpload', data);
+            showToast(currentLang==='en'?'File processed.':'File diproses.', 'success');
+        } catch(err) { showToast('Error: '+err.message, 'error'); }
+        finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    // ============================================================
+    // BATCH
+    // ============================================================
+    $('btnBatch').addEventListener('click', async () => {
+        const texts = $('batchText').value.split('\n').map(t=>t.trim()).filter(t=>t.length>0);
+        if (texts.length < 2) { showToast(currentLang==='en'?'At least 2 texts!':'Minimal 2 teks!', 'error'); return; }
+        const loading = $('loadingBatch');
+        const btn = $('btnBatch');
+        btn.disabled = true;
+        loading.classList.add('active');
+        $('resultsBatch').classList.remove('active');
+        try {
+            const data = await apiCall('/batch-check', {
+                texts,
+                topK: parseInt($('batchTopk').value)||30,
+                threshold: parseFloat($('batchThreshold').value)||0.75
+            });
+            const plag = data.results?.filter(r=>r.status==='PLAGIARISM_DETECTED').length || 0;
+            renderResults('resultsBatch', {
+                status: plag > 0 ? 'PLAGIARISM_DETECTED' : 'ORIGINAL',
+                overall_similarity: data.results?.length>0 ? (data.results.reduce((a,b)=>a+parseFloat(b.overall_similarity||0),0)/data.results.length).toFixed(2)+'%' : '0%',
+                message: `${data.results?.length||0} teks diproses. ${plag} terdeteksi plagiarisme.`,
+                threshold: parseFloat($('batchThreshold').value)||0.75,
+                matches: data.results?.slice(0,10).map((r,i)=>({id:'Batch #'+(i+1), similarity: r.overall_similarity||'0%', isPlagiarized: r.status==='PLAGIARISM_DETECTED'})) || []
+            });
+            showToast(currentLang==='en'?'Batch done.':'Batch selesai.', 'success');
+        } catch(err) { showToast('Error: '+err.message, 'error'); }
+        finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    // ============================================================
+    // REPORT
+    // ============================================================
+    $('btnReport').addEventListener('click', async () => {
+        const text = $('reportText').value.trim();
+        if (text.length < 10) { showToast(currentLang==='en'?'Text must be at least 10 characters!':'Teks minimal 10 karakter!', 'error'); return; }
+        const loading = $('loadingReport');
+        const btn = $('btnReport');
+        btn.disabled = true;
+        loading.classList.add('active');
+        try {
+            const format = $('reportFormat').value;
+            const res = await fetch(API_URL + '/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, format })
+            });
+            if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'HTTP '+res.status); }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `okongzinc_report.${format}`;
+            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+            showToast(currentLang==='en'?'Report downloaded.':'Laporan di-download.', 'success');
+        } catch(err) { showToast('Error: '+err.message, 'error'); }
+        finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    // ============================================================
+    // MANAGE
+    // ============================================================
+    $('btnAddDoc').addEventListener('click', async () => {
+        const id = $('manageId').value.trim(), text = $('manageText').value.trim(), source = $('manageSource').value.trim() || 'manual';
+        if (!id || !text) { showToast(currentLang==='en'?'ID and text required!':'ID dan teks wajib diisi!', 'error'); return; }
+        const loading = $('loadingManage');
+        const btn = $('btnAddDoc');
+        btn.disabled = true;
+        loading.classList.add('active');
+        const result = $('manageResult');
+        result.className = 'manage-result';
+        result.style.display = '';
+        try {
+            const data = await apiCall('/add', { id, text, metadata: { source } });
+            result.className = 'manage-result show success';
+            result.textContent = '✅ ' + (data.message || (currentLang==='en'?'Document added!':'Dokumen ditambahkan!'));
+            showToast(currentLang==='en'?'Document added.':'Dokumen ditambahkan.', 'success');
+            $('manageText').value = ''; $('manageId').value = '';
+        } catch(err) {
+            result.className = 'manage-result show error';
+            result.textContent = '❌ ' + err.message;
+            showToast('Error: '+err.message, 'error');
+        } finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    $('btnDeleteDoc').addEventListener('click', async () => {
+        const id = $('manageId').value.trim();
+        if (!id) { showToast(currentLang==='en'?'Enter document ID!':'Masukkan ID dokumen!', 'error'); return; }
+        if (!confirm(currentLang==='en'?`Delete document "${id}"?`:`Hapus dokumen "${id}"?`)) return;
+        const loading = $('loadingManage');
+        const btn = $('btnDeleteDoc');
+        btn.disabled = true;
+        loading.classList.add('active');
+        const result = $('manageResult');
+        result.className = 'manage-result';
+        result.style.display = '';
+        try {
+            const data = await apiCall('/delete', { id });
+            result.className = 'manage-result show success';
+            result.textContent = '🗑️ ' + (data.message || (currentLang==='en'?'Document deleted!':'Dokumen dihapus!'));
+            showToast(currentLang==='en'?'Document deleted.':'Dokumen dihapus.', 'info');
+        } catch(err) {
+            result.className = 'manage-result show error';
+            result.textContent = '❌ ' + err.message;
+            showToast('Error: '+err.message, 'error');
+        } finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    // ============================================================
+    // HISTORY LOG (v7.0) — auto-save + view + delete
+    // ============================================================
+    async function saveHistory(type, text, result, meta = {}) {
+        try {
+            await apiCall('/history', { type, text, result, meta });
+        } catch (e) { console.warn('History save failed:', e.message); }
+    }
+
+    async function loadHistory() {
+        const loading = $('loadingHistory');
+        const list = $('historyList');
+        loading.classList.add('active');
+        list.innerHTML = '';
+        try {
+            const res = await fetch(API_URL + '/history?limit=50', { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Failed');
+            if (!data.history || data.history.length === 0) {
+                list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;"></i>${currentLang==='en'?'No history yet.':'Belum ada riwayat.'}</div>`;
+                return;
+            }
+            data.history.forEach(h => {
+                const d = new Date(h.timestamp);
+                const statusCls = h.result_summary?.status === 'PLAGIARISM_DETECTED' ? 'plag' : 'orig';
+                const card = document.createElement('div');
+                card.className = 'result-item';
+                card.style.padding = '12px 14px';
+                card.innerHTML = `
+                    <div class="top" style="justify-content:space-between;">
+                        <span class="id">${escapeHtml(h.type_label || h.type)}</span>
+                        <span class="score ${statusCls}" style="font-size:12px;">${escapeHtml(h.result_summary?.overall_similarity || '—')}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
+                        ${d.toLocaleString('id-ID')} · ${escapeHtml(h.text_length || 0)} chars
+                    </div>
+                    <div style="font-size:13px;margin-top:6px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(h.text_preview||'')}</div>
+                    <div style="margin-top:8px;text-align:right;">
+                        <button class="btn btn-outline btn-sm" onclick="deleteHistory('${escapeHtml(h.id)}')" style="padding:4px 10px;font-size:11px;"><i class="fas fa-trash"></i></button>
+                    </div>`;
+                list.appendChild(card);
+            });
+        } catch (e) {
+            list.innerHTML = `<div style="color:var(--danger);padding:20px;">❌ ${escapeHtml(e.message)}</div>`;
+        } finally {
+            loading.classList.remove('active');
+        }
+    }
+
+    window.deleteHistory = async function(id) {
+        if (!confirm(currentLang==='en'?'Delete this entry?':'Hapus entri ini?')) return;
+        try {
+            await fetch(API_URL + '/history?id=' + encodeURIComponent(id), { method: 'DELETE' });
+            showToast(currentLang==='en'?'Deleted.':'Dihapus.', 'info');
+            loadHistory();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    $('btnRefreshHistory').addEventListener('click', loadHistory);
+    $('btnClearHistory').addEventListener('click', async () => {
+        if (!confirm(currentLang==='en'?'Clear ALL history? This cannot be undone.':'Hapus SEMUA riwayat? Tidak bisa dibatalkan.')) return;
+        try {
+            const res = await fetch(API_URL + '/history?limit=100');
+            const data = await res.json();
+            for (const h of (data.history || [])) {
+                await fetch(API_URL + '/history?id=' + encodeURIComponent(h.id), { method: 'DELETE' });
+            }
+            showToast(currentLang==='en'?'All history cleared.':'Semua riwayat dihapus.', 'success');
+            loadHistory();
+        } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    });
+
+    // Auto-load history saat tab history diklik
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.dataset.tab === 'history') {
+            btn.addEventListener('click', loadHistory);
+        }
+    });
+
+    // === AUTO-SAVE HISTORY setelah check/paraphrase/upload selesai ===
+    // Wrap handler asli: simpan ke history setelah sukses
+    const origCheck = $('btnCheck').onclick;
+    // (auto-save di-trigger dari dlm handler masing-masing — lihat section Check & Turnitin)
+
+    // ============================================================
+    // EXPORT RESULTS (TXT / Markdown) — client-side download
+    // ============================================================
+    let lastCheckResult = null;
+    let lastTurnitinResult = null;
+
+    function downloadFile(filename, content, mime = 'text/plain') {
+        const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        showToast(currentLang === 'en' ? 'Downloaded: ' + filename : 'Diunduh: ' + filename, 'success');
+    }
+
+    window.exportResult = function(format) {
+        const text = $('turnitinResult').textContent;
+        if (!text || text.trim() === '') { showToast(currentLang === 'en' ? 'No result to export.' : 'Tidak ada hasil untuk diexport.', 'error'); return; }
+        const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        if (format === 'md') {
+            const md = `# Hasil Turnitin\n\n**Tanggal:** ${new Date().toLocaleString('id-ID')}\n**Mode:** ${lastTurnitinResult?.mode || '-'}\n**Passes:** ${lastTurnitinResult?.passes || 1}\n\n---\n\n${text}\n\n---\n*OkongzINC Checker v7.0*\n`;
+            downloadFile(`turnitin_${ts}.md`, md, 'text/markdown');
+        } else {
+            const txt = `Hasil Turnitin\nTanggal: ${new Date().toLocaleString('id-ID')}\nMode: ${lastTurnitinResult?.mode || '-'}\nPasses: ${lastTurnitinResult?.passes || 1}\n${'='.repeat(50)}\n\n${text}\n\n${'='.repeat(50)}\nOkongzINC Checker v7.0\n`;
+            downloadFile(`turnitin_${ts}.txt`, txt);
+        }
+    };
+
+    window.exportCheckResult = function(format) {
+        if (!lastCheckResult) { showToast(currentLang === 'en' ? 'No check result.' : 'Tidak ada hasil cek.', 'error'); return; }
+        const d = lastCheckResult;
+        const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        const matches = (d.matches || []).map((m, i) =>
+            `${i + 1}. ID: ${m.id} | ${m.similarity} | ${m.isPlagiarized ? '⚠️ Plagiarism' : '✅ Original'}${m.isParaphrase ? ' | Parafrase' : ''}`
+        ).join('\n');
+        if (format === 'md') {
+            const md = `# Laporan Cek Plagiarisme\n\n**Tanggal:** ${new Date().toLocaleString('id-ID')}\n**Overall Similarity:** ${d.overall_similarity || '0%'}\n**Status:** ${d.status}\n**Pesan:** ${d.message}\n**Model:** ${d.model}\n\n## Ringkasan\n- Total matches: ${d.summary?.total_matches || 0}\n- Plagiarisme: ${d.summary?.plagiarized_count || 0}\n- Parafrase: ${d.summary?.paraphrase_count || 0}\n\n## Detail Matches\n${matches || 'Tidak ada match.'}\n\n---\n*OkongzINC Checker v7.0*\n`;
+            downloadFile(`plagiarism_check_${ts}.md`, md, 'text/markdown');
+        } else {
+            const txt = `Laporan Cek Plagiarisme\nTanggal: ${new Date().toLocaleString('id-ID')}\nOverall Similarity: ${d.overall_similarity || '0%'}\nStatus: ${d.status}\nPesan: ${d.message}\nModel: ${d.model}\n${'='.repeat(50)}\n\nRingkasan:\n- Total matches: ${d.summary?.total_matches || 0}\n- Plagiarisme: ${d.summary?.plagiarized_count || 0}\n- Parafrase: ${d.summary?.paraphrase_count || 0}\n\nDetail Matches:\n${matches || 'Tidak ada match.'}\n\n${'='.repeat(50)}\nOkongzINC Checker v7.0\n`;
+            downloadFile(`plagiarism_check_${ts}.txt`, txt);
+        }
+    };
+
+    // ============================================================
+    // SUMMARIZE
+    // ============================================================
+    const summarizeText = $('summarizeText');
+    function updateSummarizeCount() {
+        const t = summarizeText.value;
+        $('summarizeWords').textContent = t.trim() ? t.trim().split(/\s+/).length : 0;
+        $('summarizeChars').textContent = t.length;
+    }
+    summarizeText.addEventListener('input', updateSummarizeCount);
+
+    $('btnSummarize').addEventListener('click', async () => {
+        const text = summarizeText.value.trim();
+        if (text.length < 50) { showToast(currentLang==='en'?'Text must be at least 50 characters!':'Teks minimal 50 karakter!', 'error'); return; }
+        const btn = $('btnSummarize');
+        const loading = $('loadingSummarize');
+        const box = $('summarizeBox');
+        const result = $('summarizeResult');
+        btn.disabled = true;
+        loading.classList.add('active');
+        box.style.display = 'none';
+        try {
+            const data = await apiCall('/summarize', {
+                text,
+                length: $('summarizeLength').value,
+                format: $('summarizeFormat').value
+            });
+            if (data.error) throw new Error(data.error);
+            result.textContent = data.summary;
+            const meta = [];
+            meta.push(`${data.word_count_original}→${data.word_count_summary} kata`);
+            meta.push(`-${data.reduction_percent}%`);
+            result.textContent += '\n\n— ' + meta.join(' • ') + ' —';
+            box.style.display = '';
+            box.classList.add('active');
+            if (hasAnime) {
+                animate(result, { opacity: [0, 1], translateY: [8, 0], duration: 400, ease: 'out(3)' });
+            }
+            showToast(currentLang==='en'?'Summary ready!':'✅ Ringkasan siap!', 'success');
+            saveHistory('summarize', text, { status: 'SUMMARIZED', overall_similarity: null, matches: [], summary: data.summary }, { length: data.length, format: data.format });
+        } catch(err) { showToast('❌ ' + err.message, 'error'); }
+        finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    $('btnClearSummarize').addEventListener('click', () => {
+        summarizeText.value = '';
+        updateSummarizeCount();
+        $('summarizeBox').style.display = 'none';
+        $('summarizeBox').classList.remove('active');
+    });
+
+    $('copySummarizeResult').addEventListener('click', () => {
+        const text = $('summarizeResult').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(currentLang==='en'?'Copied!':'Tersalin!', 'success');
+        }).catch(() => { showToast('Copy failed', 'error'); });
+    });
+
+    // ============================================================
+    // AI DETECT
+    // ============================================================
+    const aiDetectText = $('aiDetectText');
+    function updateAiDetectCount() {
+        const t = aiDetectText.value;
+        $('aiDetectWords').textContent = t.trim() ? t.trim().split(/\s+/).length : 0;
+        $('aiDetectChars').textContent = t.length;
+    }
+    aiDetectText.addEventListener('input', updateAiDetectCount);
+
+    $('btnAiDetect').addEventListener('click', async () => {
+        const text = aiDetectText.value.trim();
+        if (text.length < 50) { showToast(currentLang==='en'?'Text must be at least 50 characters!':'Teks minimal 50 karakter!', 'error'); return; }
+        const btn = $('btnAiDetect');
+        const loading = $('loadingAiDetect');
+        const container = $('resultsAiDetect');
+        btn.disabled = true;
+        loading.classList.add('active');
+        container.classList.remove('active');
+        try {
+            const data = await apiCall('/detect-ai', { text });
+            if (data.error) throw new Error(data.error);
+            const prob = data.ai_probability;
+            const verdict = data.verdict;
+            const color = prob > 70 ? '#ef4444' : prob > 40 ? '#f59e0b' : '#22c55e';
+            const emoji = prob > 70 ? '🤖' : prob > 40 ? '⚖️' : '👤';
+            let html = `<div class="result-item" style="border-left:4px solid ${color};padding:16px;">
+                <div class="top">
+                    <span class="id">${emoji} AI Probability</span>
+                    <span class="score ai-score-num" style="color:${color};font-size:28px;font-weight:800;">0%</span>
+                </div>
+                <div style="margin-top:8px;font-size:14px;"><strong>Verdict:</strong> ${verdict}</div>
+                <div style="margin-top:4px;font-size:13px;opacity:0.8;"><strong>Confidence:</strong> ${data.confidence}%</div>`;
+
+            if (data.metrics) {
+                const m = data.metrics;
+                html += `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;">
+                    <div><strong>LLM Score:</strong> ${m.llm_score !== null ? m.llm_score + '%' : 'N/A'}</div>
+                    <div><strong>Burstiness:</strong> uniformity ${m.burstiness.uniformity_score} · ${m.burstiness.sentence_count} sentences · mean ${m.burstiness.mean_sentence_length} words · std_dev ${m.burstiness.std_dev}</div>
+                    <div><strong>AI Tell Patterns:</strong> ${m.ai_tell_patterns.count} found (score: ${m.ai_tell_patterns.score})</div>
+                </div>`;
+            }
+            if (data.ai_tells_found && data.ai_tells_found.length > 0) {
+                html += `<div style="margin-top:8px;font-size:13px;"><strong>🤖 AI Tells:</strong> ${data.ai_tells_found.map(t => '<code>'+escapeHtml(t)+'</code>').join(' ')}</div>`;
+            }
+            if (data.human_tells_found && data.human_tells_found.length > 0) {
+                html += `<div style="margin-top:4px;font-size:13px;"><strong>👤 Human Tells:</strong> ${data.human_tells_found.map(t => '<code>'+escapeHtml(t)+'</code>').join(' ')}</div>`;
+            }
+            if (data.note) {
+                html += `<div style="margin-top:8px;font-size:12px;opacity:0.7;font-style:italic;">${escapeHtml(data.note)}</div>`;
+            }
+            html += `<div style="margin-top:8px;font-size:11px;opacity:0.5;">${data.disclaimer}</div>`;
+            html += `</div>`;
+            container.innerHTML = html;
+            container.classList.add('active');
+            // Animate AI score counter
+            if (window._animateAiScore) {
+                const scoreEl = container.querySelector('.ai-score-num');
+                if (scoreEl) window._animateAiScore(scoreEl, prob);
+            }
+            // Stagger result details
+            if (hasAnime) {
+                animate(container.querySelectorAll('.result-item > div:not(.top)'), {
+                    opacity: [0, 1], translateY: [6, 0], duration: 350, delay: anime.stagger(40), ease: 'out(3)'
+                });
+            }
+            showToast(currentLang==='en'?'Analysis complete!':'✅ Analisis selesai!', 'success');
+            saveHistory('aidetect', text, { status: 'AI_DETECT', overall_similarity: prob + '%', matches: [], verdict }, { ai_probability: prob });
+        } catch(err) { showToast('❌ ' + err.message, 'error'); }
+        finally { loading.classList.remove('active'); btn.disabled = false; }
+    });
+
+    $('btnClearAiDetect').addEventListener('click', () => {
+        aiDetectText.value = '';
+        updateAiDetectCount();
+        $('resultsAiDetect').classList.remove('active');
+        $('resultsAiDetect').innerHTML = '';
+    });
+
+    // ============================================================
+    // ANIME.JS ELEGANT ANIMATIONS
+    // ============================================================
+    const { animate, createTimeline } = typeof anime !== 'undefined' ? anime : { animate: null, createTimeline: null };
+    const hasAnime = typeof animate === 'function';
+
+    if (hasAnime) {
+        // --- Button click micro-interactions ---
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn');
+            if (!btn) return;
+            animate(btn, { scale: [1, 0.95, 1], duration: 200, ease: 'out(2)' });
+        });
+
+        // --- Result items stagger animation ---
+        const originalRender = renderResults;
+        renderResults = function(containerId, data) {
+            originalRender(containerId, data);
+            const container = $(containerId);
+            animate(container.querySelectorAll('.result-item, .stat-card'), {
+                opacity: [0, 1], translateY: [8, 0], scale: [0.98, 1],
+                duration: 400, delay: anime.stagger(60), ease: 'out(3)'
+            });
+        };
+
+        // --- AI Detect score counter animation ---
+        window._animateAiScore = function(element, targetValue) {
+            const obj = { val: 0 };
+            animate(obj, {
+                val: targetValue, duration: 1200, ease: 'out(4)',
+                onUpdate: () => { element.textContent = Math.round(obj.val) + '%'; }
+            });
+        };
+    }
+
+    console.log('✅ OkongzINC Checker v7.0 — Turnitin Multi-Pass + History + Stealth + Summarize + AI Detect + anime.js');
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "okongz-cloudflare",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-12-18"
+}
+{
+  "mcpServers": {
+    "cloudflare-tasks": {
+      "url": "https://my-mcp-server.claudeh1761.workers.dev/mcp"
+    }
+  }
+}

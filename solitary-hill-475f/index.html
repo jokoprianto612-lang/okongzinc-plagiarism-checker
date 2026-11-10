@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Content Security Policy: restrict external resources, block inline event handlers except Turnstile + anime.js -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: blob:; connect-src 'self' https://plagiarism-checker.claudeh1761.workers.dev https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com;" />
-    <title>OkongzINC Checker · Ado</title>
+    <title>Plagiarism Checker · Ado</title>
 
     <!-- Favicon: SVG shield inline -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 L85 20 V50 C85 75 65 90 50 95 C35 90 15 75 15 50 V20 Z' fill='%230f62fe'/%3E%3Ctext x='50' y='65' font-size='40' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'%3EO%3C/text%3E%3C/svg%3E" />
@@ -131,7 +131,45 @@
             box-shadow: var(--shadow);
         }
         .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; flex-shrink: 0; }
-        .logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 20px;
+            animation: logoSpin3d 6s linear infinite;
+            transform-style: preserve-3d;
+            perspective: 120px;
+        }
+        .logo-icon i {
+            transform-style: preserve-3d;
+            display: inline-block;
+        }
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            background: rgba(255,255,255,0.15);
+            transform: translateZ(-24px);
+            pointer-events: none;
+        }
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: calc(var(--radius) - 2px);
+            background: rgba(0,0,0,0.2);
+            transform: translateZ(-16px);
+            pointer-events: none;
+        }
+        @keyframes logoSpin3d {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(15deg) rotateY(90deg); }
+            50% { transform: rotateX(-10deg) rotateY(180deg); }
+            75% { transform: rotateX(20deg) rotateY(270deg); }
+            100% { transform: rotateX(0deg) rotateY(360deg); }
+        }
         .logo-sub { font-size: 12px; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
         .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
         .badge-status, .badge-dims { padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text-secondary); background: var(--bg-card); white-space: nowrap; }
@@ -302,8 +340,8 @@
     ============================================================ -->
     <header class="header">
         <div class="logo">
-            <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 5 L85 20 V50 C85 75 65 90 50 95 C35 90 15 75 15 50 V20 Z" fill="white"/><text x="50" y="68" font-size="42" font-weight="bold" fill="#0f62fe" text-anchor="middle" font-family="Arial">O</text></svg></div>
-            <span>OkongzINC<span style="color:var(--text-secondary);font-weight:400;"> Checker</span></span>
+            <div class="logo-icon"><i class="fas fa-shield-halved"></i></div>
+            <span>Plagiarism<span style="color:var(--text-secondary);font-weight:400;"> Checker</span></span>
             <span class="logo-sub">v7.0 · Ado</span>
         </div>
         <div class="header-right">
@@ -663,10 +701,10 @@
     ============================================================ -->
     <footer class="footer">
         <div>Powered by <span class="brand">OkongzINC</span></div>
-        <div style="font-size:11px;margin-top:4px;opacity:0.6;">&copy; 2026 OkongzINC Checker v7.0 · Ado Edition</div>
+        <div style="font-size:11px;margin-top:4px;opacity:0.6;">&copy; 2026 Plagiarism Checker v7.0 · Ado Edition</div>
         <div class="faq-section">
             <h4 data-i18n="faq-title">FAQ</h4>
-            <details><summary data-i18n="faq-q1">Apa itu OkongzINC Checker?</summary><p data-i18n="faq-a1">Alat OkongzINC utk cek plagiarisme & turnitin dgn pipeline 4-stage (Ultra v7.0), AI embedding bge-large 1024 dims.</p></details>
+            <details><summary data-i18n="faq-q1">Apa itu Plagiarism Checker?</summary><p data-i18n="faq-a1">Alat Plagiarism Checker utk cek plagiarisme & turnitin dgn pipeline 4-stage (Ultra v7.0), AI embedding bge-large 1024 dims.</p></details>
             <details><summary data-i18n="faq-q2">Apakah gratis?</summary><p data-i18n="faq-a2">Ya, 100% gratis tanpa biaya atau login.</p></details>
             <details><summary data-i18n="faq-q3">Apa itu Turnitin?</summary><p data-i18n="faq-a3">Fitur parafrase dengan 11 mode + Synonym Level slider. Lihat dropdown Mode Parafrase untuk daftar lengkap.</p></details>
             <details><summary data-i18n="faq-q4">File apa saja yang bisa diupload?</summary><p data-i18n="faq-a4">Support: TXT, PDF, DOCX, HTML, JSON.</p></details>
@@ -725,7 +763,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
             'manage-id-label': 'ID', 'manage-source-label': 'Sumber', 'manage-text-label': 'Teks',
             'btn-add': 'Tambah', 'btn-delete': 'Hapus', 'loading-manage': 'Memproses...',
             'faq-title': 'FAQ',
-            'faq-q1': 'Apa itu OkongzINC Checker?', 'faq-a1': 'Alat OkongzINC utk cek plagiarisme & turnitin dgn pipeline 4-stage (Ultra v7.0), AI embedding bge-large 1024 dims.',
+            'faq-q1': 'Apa itu Plagiarism Checker?', 'faq-a1': 'Alat OkongzINC utk cek plagiarisme & turnitin dgn pipeline 4-stage (Ultra v7.0), AI embedding bge-large 1024 dims.',
             'faq-q2': 'Apakah gratis?', 'faq-a2': 'Ya, 100% gratis tanpa biaya atau login.',
             'faq-q3': 'Apa itu Turnitin?', 'faq-a3': 'Fitur parafrase dengan 11 mode: Standard, Fluency, Humanize, Formal, Academic, Simple, Creative, Expand, Shorten, Stealth (bypass AI), dan Ultra v7.0 (pipeline 4-stage). Dilengkapi Synonym Level slider (0-100).',
  'faq-q4': 'File apa saja yang bisa diupload?', 'faq-a4': 'Support: TXT, PDF, DOCX, HTML, JSON.',
@@ -769,7 +807,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
             'manage-id-label': 'ID', 'manage-source-label': 'Source', 'manage-text-label': 'Text',
             'btn-add': 'Add', 'btn-delete': 'Delete', 'loading-manage': 'Processing...',
             'faq-title': 'FAQ',
-            'faq-q1': 'What is OkongzINC Checker?', 'faq-a1': 'OkongzINC tool for plagiarism & Turnitin checking with 4-stage Ultra pipeline, bge-large 1024 dims.',
+            'faq-q1': 'What is Plagiarism Checker?', 'faq-a1': 'Plagiarism Checker tool for plagiarism & Turnitin checking with 4-stage Ultra pipeline, bge-large 1024 dims.',
             'faq-q2': 'Is it free?', 'faq-a2': 'Yes, 100% free with no fees or login required.',
             'faq-q3': 'What is Turnitin?', 'faq-a3': 'A paraphrasing feature with 11 modes: Standard, Fluency, Humanize, Formal, Academic, Simple, Creative, Expand, Shorten, Stealth (bypass AI), and Ultra v7.0 (4-stage pipeline). Includes Synonym Level slider (0-100).',
  'faq-q4': 'What files can be uploaded?', 'faq-a4': 'Support: TXT, PDF, DOCX, HTML, JSON.',
@@ -803,6 +841,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
     // API & UTILITY
     // ============================================================
     const API_URL = 'https://plagiarism-checker.claudeh1761.workers.dev';
+    const API_KEY = 'okongzinc';
     const $ = id => document.getElementById(id);
     const toast = $('toast');
     // Escape HTML utk cegah XSS saat insert data backend/user ke innerHTML
@@ -837,7 +876,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
         if (token) body.turnstileToken = token;
         const res = await fetch(API_URL + endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
             body: JSON.stringify(body)
         });
         if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'HTTP '+res.status); }
@@ -1087,7 +1126,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
             formData.append('threshold', $('uploadThreshold').value || '0.75');
             const tsToken = getTurnstileToken();
             if (tsToken) formData.append('turnstileToken', tsToken);
-            const res = await fetch(API_URL + '/upload', { method: 'POST', body: formData });
+            const res = await fetch(API_URL + '/upload', { method: 'POST', headers: { 'X-API-Key': API_KEY }, body: formData });
             if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'HTTP '+res.status); }
             const data = await res.json();
             renderResults('resultsUpload', data);
@@ -1140,7 +1179,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
             const format = $('reportFormat').value;
             const res = await fetch(API_URL + '/report', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
                 body: JSON.stringify({ text, format })
             });
             if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'HTTP '+res.status); }
@@ -1219,7 +1258,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
         loading.classList.add('active');
         list.innerHTML = '';
         try {
-            const res = await fetch(API_URL + '/history?limit=50', { headers: { 'Accept': 'application/json' } });
+            const res = await fetch(API_URL + '/history?limit=50', { headers: { 'Accept': 'application/json', 'X-API-Key': API_KEY } });
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Failed');
             if (!data.history || data.history.length === 0) {
@@ -1256,7 +1295,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
     window.deleteHistory = async function(id) {
         if (!confirm(currentLang==='en'?'Delete this entry?':'Hapus entri ini?')) return;
         try {
-            await fetch(API_URL + '/history?id=' + encodeURIComponent(id), { method: 'DELETE' });
+            await fetch(API_URL + '/history?id=' + encodeURIComponent(id), { method: 'DELETE', headers: { 'X-API-Key': API_KEY } });
             showToast(currentLang==='en'?'Deleted.':'Dihapus.', 'info');
             loadHistory();
         } catch (e) { showToast('Error: ' + e.message, 'error'); }
@@ -1266,10 +1305,10 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
     $('btnClearHistory').addEventListener('click', async () => {
         if (!confirm(currentLang==='en'?'Clear ALL history? This cannot be undone.':'Hapus SEMUA riwayat? Tidak bisa dibatalkan.')) return;
         try {
-            const res = await fetch(API_URL + '/history?limit=100');
+            const res = await fetch(API_URL + '/history?limit=100', { headers: { 'X-API-Key': API_KEY } });
             const data = await res.json();
             for (const h of (data.history || [])) {
-                await fetch(API_URL + '/history?id=' + encodeURIComponent(h.id), { method: 'DELETE' });
+                await fetch(API_URL + '/history?id=' + encodeURIComponent(h.id), { method: 'DELETE', headers: { 'X-API-Key': API_KEY } });
             }
             showToast(currentLang==='en'?'All history cleared.':'Semua riwayat dihapus.', 'success');
             loadHistory();
@@ -1309,10 +1348,10 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
         if (!text || text.trim() === '') { showToast(currentLang === 'en' ? 'No result to export.' : 'Tidak ada hasil untuk diexport.', 'error'); return; }
         const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
         if (format === 'md') {
-            const md = `# Hasil Turnitin\n\n**Tanggal:** ${new Date().toLocaleString('id-ID')}\n**Mode:** ${lastTurnitinResult?.mode || '-'}\n**Passes:** ${lastTurnitinResult?.passes || 1}\n\n---\n\n${text}\n\n---\n*OkongzINC Checker v7.0*\n`;
+            const md = `# Hasil Turnitin\n\n**Tanggal:** ${new Date().toLocaleString('id-ID')}\n**Mode:** ${lastTurnitinResult?.mode || '-'}\n**Passes:** ${lastTurnitinResult?.passes || 1}\n\n---\n\n${text}\n\n---\n*Plagiarism Checker v7.0*\n`;
             downloadFile(`turnitin_${ts}.md`, md, 'text/markdown');
         } else {
-            const txt = `Hasil Turnitin\nTanggal: ${new Date().toLocaleString('id-ID')}\nMode: ${lastTurnitinResult?.mode || '-'}\nPasses: ${lastTurnitinResult?.passes || 1}\n${'='.repeat(50)}\n\n${text}\n\n${'='.repeat(50)}\nOkongzINC Checker v7.0\n`;
+            const txt = `Hasil Turnitin\nTanggal: ${new Date().toLocaleString('id-ID')}\nMode: ${lastTurnitinResult?.mode || '-'}\nPasses: ${lastTurnitinResult?.passes || 1}\n${'='.repeat(50)}\n\n${text}\n\n${'='.repeat(50)}\nPlagiarism Checker v7.0\n`;
             downloadFile(`turnitin_${ts}.txt`, txt);
         }
     };
@@ -1325,10 +1364,10 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
             `${i + 1}. ID: ${m.id} | ${m.similarity} | ${m.isPlagiarized ? '⚠️ Plagiarism' : '✅ Original'}${m.isParaphrase ? ' | Parafrase' : ''}`
         ).join('\n');
         if (format === 'md') {
-            const md = `# Laporan Cek Plagiarisme\n\n**Tanggal:** ${new Date().toLocaleString('id-ID')}\n**Overall Similarity:** ${d.overall_similarity || '0%'}\n**Status:** ${d.status}\n**Pesan:** ${d.message}\n**Model:** ${d.model}\n\n## Ringkasan\n- Total matches: ${d.summary?.total_matches || 0}\n- Plagiarisme: ${d.summary?.plagiarized_count || 0}\n- Parafrase: ${d.summary?.paraphrase_count || 0}\n\n## Detail Matches\n${matches || 'Tidak ada match.'}\n\n---\n*OkongzINC Checker v7.0*\n`;
+            const md = `# Laporan Cek Plagiarisme\n\n**Tanggal:** ${new Date().toLocaleString('id-ID')}\n**Overall Similarity:** ${d.overall_similarity || '0%'}\n**Status:** ${d.status}\n**Pesan:** ${d.message}\n**Model:** ${d.model}\n\n## Ringkasan\n- Total matches: ${d.summary?.total_matches || 0}\n- Plagiarisme: ${d.summary?.plagiarized_count || 0}\n- Parafrase: ${d.summary?.paraphrase_count || 0}\n\n## Detail Matches\n${matches || 'Tidak ada match.'}\n\n---\n*Plagiarism Checker v7.0*\n`;
             downloadFile(`plagiarism_check_${ts}.md`, md, 'text/markdown');
         } else {
-            const txt = `Laporan Cek Plagiarisme\nTanggal: ${new Date().toLocaleString('id-ID')}\nOverall Similarity: ${d.overall_similarity || '0%'}\nStatus: ${d.status}\nPesan: ${d.message}\nModel: ${d.model}\n${'='.repeat(50)}\n\nRingkasan:\n- Total matches: ${d.summary?.total_matches || 0}\n- Plagiarisme: ${d.summary?.plagiarized_count || 0}\n- Parafrase: ${d.summary?.paraphrase_count || 0}\n\nDetail Matches:\n${matches || 'Tidak ada match.'}\n\n${'='.repeat(50)}\nOkongzINC Checker v7.0\n`;
+            const txt = `Laporan Cek Plagiarisme\nTanggal: ${new Date().toLocaleString('id-ID')}\nOverall Similarity: ${d.overall_similarity || '0%'}\nStatus: ${d.status}\nPesan: ${d.message}\nModel: ${d.model}\n${'='.repeat(50)}\n\nRingkasan:\n- Total matches: ${d.summary?.total_matches || 0}\n- Plagiarisme: ${d.summary?.plagiarized_count || 0}\n- Parafrase: ${d.summary?.paraphrase_count || 0}\n\nDetail Matches:\n${matches || 'Tidak ada match.'}\n\n${'='.repeat(50)}\nPlagiarism Checker v7.0\n`;
             downloadFile(`plagiarism_check_${ts}.txt`, txt);
         }
     };
@@ -1506,7 +1545,7 @@ SCRIPT — LENGKAP, TANPA TROUBLESHOOT
         };
     }
 
-    console.log('✅ OkongzINC Checker v7.0 — Turnitin Multi-Pass + History + Stealth + Summarize + AI Detect + anime.js');
+    console.log('✅ Plagiarism Checker v7.0 — Turnitin Multi-Pass + History + Stealth + Summarize + AI Detect + anime.js');
 </script>
 </body>
 </html>

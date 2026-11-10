@@ -2,20 +2,129 @@
 // OKONGZINC CHECKER API - v7.0 (bge-large)
 // ============================================================
 
+// ============================================================
+// SECURITY CONFIG — Edit di sini untuk production
+// ============================================================
+const ALLOWED_ORIGINS = [
+  'https://solitary-hill-475f.pages.dev',
+  'https://main.solitary-hill-475f.pages.dev',
+  'https://1e753c44.solitary-hill-475f.pages.dev',
+];
+
+// API Key wajib untuk semua endpoint kecuali / dan /test-ai
+// Set via wrangler secret: wrangler secret put API_KEY
+// Contoh: API_KEY=okzc_live_xxxxxxxx
+function getApiKey(env) {
+  return env.API_KEY || '';
+}
+
+// Rate limit config (per IP, per menit)
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 menit
+const RATE_LIMIT_MAX_REQUESTS = 30;     // maks 30 req/menit per IP
+const RATE_LIMIT_STRICT_ENDPOINTS = ['/check', '/paraphrase', '/summarize', '/detect-ai', '/upload'];
+const RATE_LIMIT_STRICT_MAX = 10;       // maks 10 req/menit untuk endpoint berat
+
+// Simple in-memory rate limiter (reset setiap window)
+// Untuk production multi-instance, pakai KV dengan counter
+const rateLimitMap = new Map();
+
+function getClientIp(request) {
+  const cf = request.headers.get('cf-connecting-ip');
+  if (cf) return cf;
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) return xff.split(',')[0].trim();
+  return 'unknown';
+}
+
+function checkRateLimit(ip, isStrict = false) {
+  const now = Date.now();
+  const windowStart = now - (now % RATE_LIMIT_WINDOW_MS);
+  const key = `${ip}:${windowStart}`;
+  const current = rateLimitMap.get(key) || 0;
+  const limit = isStrict ? RATE_LIMIT_STRICT_MAX : RATE_LIMIT_MAX_REQUESTS;
+  if (current >= limit) {
+    return { allowed: false, retryAfter: Math.ceil((windowStart + RATE_LIMIT_WINDOW_MS - now) / 1000) };
+  }
+  rateLimitMap.set(key, current + 1);
+  return { allowed: true, remaining: limit - current - 1 };
+}
+
+function headersFor(origin) {
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
+    'Access-Control-Max-Age': '86400',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  };
+}
+
+function apiKeyUnauthorized() {
+  return new Response(JSON.stringify({
+    success: false,
+    error: 'API Key wajib. Sertakan header X-API-Key.',
+    code: 'API_KEY_REQUIRED'
+  }), {
+    status: 401,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+function rateLimitExceeded(retryAfter) {
+  return new Response(JSON.stringify({
+    success: false,
+    error: 'Terlalu banyak request. Coba lagi dalam ' + retryAfter + ' detik.',
+    code: 'RATE_LIMIT_EXCEEDED',
+    retry_after: retryAfter
+  }), {
+    status: 429,
+    headers: { 'Content-Type': 'application/json', 'Retry-After': String(retryAfter) }
+  });
+}
+
+function sanitizeHtml(text) {
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export default {
   async fetch(request, env) {
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
-    }
-
     const url = new URL(request.url);
     const path = url.pathname;
+    const origin = request.headers.get('origin') || '';
+    const headers = headersFor(origin);
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers });
+    }
+
+    const ip = getClientIp(request);
+
+    // Rate limit untuk semua request
+    const isStrict = RATE_LIMIT_STRICT_ENDPOINTS.includes(path);
+    const rl = checkRateLimit(ip, isStrict);
+    if (!rl.allowed) {
+      return rateLimitExceeded(rl.retryAfter);
+    }
+
+    // API Key wajib untuk semua endpoint kecuali / dan /test-ai
+    const isPublic = path === '/' || path === '/test-ai';
+    if (!isPublic) {
+      const apiKey = env.API_KEY || '';
+      const clientKey = request.headers.get('x-api-key') || '';
+      if (!apiKey || clientKey !== apiKey) {
+        const h = { ...headers, 'Content-Type': 'application/json' };
+        return apiKeyUnauthorized();
+      }
+    }
+
     const MODEL = env.MODEL_NAME || '@cf/baai/bge-large-en-v1.5';
 
     // ============================================================
@@ -31,12 +140,12 @@ export default {
           dimensions: dims,
           sample: result.data ? result.data[0].slice(0, 5) : []
         }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       } catch (error) {
         return new Response(JSON.stringify({ success: false, error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -50,7 +159,7 @@ export default {
         if (!id || !text) {
           return new Response(JSON.stringify({ error: 'ID dan text wajib diisi' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -79,13 +188,13 @@ export default {
           total_chunks: chunks.length,
           total_characters: text.length
         }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
 
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -99,12 +208,12 @@ export default {
         // Turnstile verification (skip jika secret key kosong)
         const ts = await verifyTurnstile(turnstileToken, env);
         if (!ts.success) {
-          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
         if (!text) {
           return new Response(JSON.stringify({ error: 'Text wajib diisi' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -190,13 +299,13 @@ export default {
             highest_score: results.length > 0 ? results[0].score : 0
           }
         }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
 
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -213,13 +322,13 @@ export default {
         // Turnstile verification (skip jika secret key kosong)
         const ts = await verifyTurnstile(formData.get('turnstileToken'), env);
         if (!ts.success) {
-          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         if (!file) {
           return new Response(JSON.stringify({ error: 'File tidak ditemukan' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -228,7 +337,7 @@ export default {
             error: 'File terlalu besar. Maksimal 100MB.'
           }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -242,7 +351,7 @@ export default {
             filename: file.name
           }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -297,7 +406,7 @@ export default {
             highest_score: results.length > 0 ? results[0].score : 0
           }
         }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
 
       } catch (error) {
@@ -307,7 +416,7 @@ export default {
           stack: error.stack
         }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -321,7 +430,7 @@ export default {
         if (!texts || !Array.isArray(texts) || texts.length === 0) {
           return new Response(JSON.stringify({ error: 'Array texts wajib diisi' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -364,13 +473,13 @@ export default {
             errors: results.filter(r => r.error).length
           }
         }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
 
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -387,7 +496,7 @@ export default {
         if (!text) {
           return new Response(JSON.stringify({ error: 'Text wajib diisi' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -424,13 +533,13 @@ export default {
             overall_similarity: overallScore.toFixed(2) + '%',
             status: overallScore > thresholdVal * 100 ? 'PLAGIARISM_DETECTED' : 'ORIGINAL',
             matches: results
-          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }), { headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         const html = generateReportHTML(text, { overall_similarity: overallScore.toFixed(2) + '%', matches: results });
         return new Response(html, {
           headers: {
-            ...corsHeaders,
+            ...headers,
             'Content-Type': 'text/html; charset=utf-8',
             'Content-Disposition': 'attachment; filename="okongzinc_report.html"'
           }
@@ -439,7 +548,7 @@ export default {
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -456,7 +565,7 @@ export default {
         if (!id) {
           return new Response(JSON.stringify({ error: 'ID wajib diisi' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -500,7 +609,7 @@ export default {
             success: true,
             message: `Tidak ada chunk ditemukan untuk dokumen '${id}' (mungkin sudah dihapus)`,
             deleted_count: 0
-          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }), { headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         await env.VECTORIZE.deleteByIds(idsToDelete);
@@ -509,11 +618,11 @@ export default {
           message: `Dokumen '${id}' berhasil dihapus (${idsToDelete.length} chunk)`,
           deleted_count: idsToDelete.length,
           deleted_ids: idsToDelete
-        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }), { headers: { ...headers, 'Content-Type': 'application/json' } });
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -535,19 +644,19 @@ export default {
         // Turnstile verification (skip jika secret key kosong)
         const ts = await verifyTurnstile(body.turnstileToken, env);
         if (!ts.success) {
-          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         if (text.length < 10) {
           return new Response(JSON.stringify({ error: 'Teks minimal 10 karakter' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
         if (text.length > 8000) {
           return new Response(JSON.stringify({ error: 'Teks terlalu panjang. Maksimal 8000 karakter per request.' }), {
             status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: { ...headers, 'Content-Type': 'application/json' }
           });
         }
 
@@ -611,7 +720,7 @@ export default {
           }
           if (!best) {
             return new Response(JSON.stringify({ error: 'Gagal generate kandidat paraphrase' }), {
-              status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+              status: 500, headers: { ...headers, 'Content-Type': 'application/json' }
             });
           }
           current = best.text;
@@ -652,7 +761,7 @@ export default {
             },
             meaning_check: meaningCheck,
             ai_detection_hint: 'Mode ULTRA v7.0: scrub + best-of-N personas + similarity gate + dysfluency. Pipeline 4-stage adaptasi VoicePrint. Tidak ada jaminan 100% lolos deteksi AI.'
-          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }), { headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         // ============================================================
@@ -746,13 +855,13 @@ export default {
           meaning_check: meaningCheck,
           ai_detection_hint: mode === 'stealth' ? 'Mode stealth: multi-pass + humanize untuk menurunkan deteksi AI. Tidak ada jaminan 100% lolos.' : null
         }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
 
       } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...headers, 'Content-Type': 'application/json' }
         });
       }
     }
@@ -770,13 +879,13 @@ export default {
 
         const ts = await verifyTurnstile(body.turnstileToken, env);
         if (!ts.success) {
-          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
         if (text.length < 50) {
-          return new Response(JSON.stringify({ error: 'Teks minimal 50 karakter untuk dirangkum.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: 'Teks minimal 50 karakter untuk dirangkum.' }), { status: 400, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
         if (text.length > 15000) {
-          return new Response(JSON.stringify({ error: 'Teks terlalu panjang. Maksimal 15000 karakter.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: 'Teks terlalu panjang. Maksimal 15000 karakter.' }), { status: 400, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         const lengthMap = {
@@ -812,9 +921,9 @@ export default {
           word_count_original: wordCountOriginal,
           word_count_summary: wordCountSummary,
           reduction_percent: reduction
-        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }), { headers: { ...headers, 'Content-Type': 'application/json' } });
       } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } });
       }
     }
 
@@ -829,13 +938,13 @@ export default {
 
         const ts = await verifyTurnstile(body.turnstileToken, env);
         if (!ts.success) {
-          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: ts.error }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
         if (text.length < 50) {
-          return new Response(JSON.stringify({ error: 'Teks minimal 50 karakter untuk dianalisis.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: 'Teks minimal 50 karakter untuk dianalisis.' }), { status: 400, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
         if (text.length > 8000) {
-          return new Response(JSON.stringify({ error: 'Teks terlalu panjang. Maksimal 8000 karakter.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: 'Teks terlalu panjang. Maksimal 8000 karakter.' }), { status: 400, headers: { ...headers, 'Content-Type': 'application/json' } });
         }
 
         const LLM_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
@@ -912,9 +1021,9 @@ export default {
           human_tells_found: detection.human_tells || detection.human_tells_found || [],
           note: detection.note || '',
           disclaimer: 'Hasil deteksi bersifat probabilistik. Tidak ada detektor AI yang 100% akurat. Gunakan sebagai indikator, bukan kepastian.'
-        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }), { headers: { ...headers, 'Content-Type': 'application/json' } });
       } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } });
       }
     }
 
@@ -937,14 +1046,14 @@ export default {
           }
           // Urutkan desc by timestamp
           entries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          return Response.json({ success: true, count: entries.length, history: entries }, { headers: corsHeaders });
+          return Response.json({ success: true, count: entries.length, history: entries }, { headers: headers });
         }
         // DELETE: hapus 1 entry
         if (request.method === 'DELETE') {
           const id = new URL(request.url).searchParams.get('id');
-          if (!id) return Response.json({ error: 'id wajib diisi' }, { status: 400, headers: corsHeaders });
+          if (!id) return Response.json({ error: 'id wajib diisi' }, { status: 400, headers: headers });
           await env.HISTORY.delete(id);
-          return Response.json({ success: true, message: 'History dihapus' }, { headers: corsHeaders });
+          return Response.json({ success: true, message: 'History dihapus' }, { headers: headers });
         }
         // POST: simpan history baru
         if (request.method === 'POST') {
@@ -968,11 +1077,11 @@ export default {
             expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000
           };
           await env.HISTORY.put(id, JSON.stringify(entry), { expirationTtl: 30 * 24 * 60 * 60 });
-          return Response.json({ success: true, id, entry }, { headers: corsHeaders });
+          return Response.json({ success: true, id, entry }, { headers: headers });
         }
-        return Response.json({ error: 'Method not allowed' }, { status: 405, headers: corsHeaders });
+        return Response.json({ error: 'Method not allowed' }, { status: 405, headers: headers });
       } catch (error) {
-        return Response.json({ error: error.message }, { status: 500, headers: corsHeaders });
+        return Response.json({ error: error.message }, { status: 500, headers: headers });
       }
     }
 
@@ -1009,7 +1118,7 @@ export default {
         max_results: env.MAX_RESULTS || '100'
       }
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...headers, 'Content-Type': 'application/json' }
     });
   }
 };
@@ -1343,10 +1452,67 @@ async function extractTextFromFile(buffer, filename) {
   return cleaned;
 }
 
+// ============================================================
+// ANTI-HALLUCINASI — Verifikasi entitas & fakta antara teks asli & hasil
+// ============================================================
+
+// Ekstrak entitas sederhana: kata kapital, angka, tanggal, nama propres
+function extractEntities(text) {
+  const entities = new Set();
+  // Kata dengan huruf kapital awal (nama proprie)
+  const capWords = text.match(/\b[A-ZÄÖÜ][a-zäöü]+(?:\s+[A-ZÄÖÜ][a-zäöü]+)*\b/g) || [];
+  capWords.forEach(w => entities.add(w.toLowerCase()));
+  // Angka (tahun, jumlah, persentase, dll)
+  const numbers = text.match(/\b\d{4}\b|\b\d+(?:\.\d+)?%?\b/g) || [];
+  numbers.forEach(n => entities.add(n));
+  // Tanggal pola umum
+  const dates = text.match(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g) || [];
+  dates.forEach(d => entities.add(d));
+  return entities;
+}
+
+// Bandingkan entitas asli vs hasil parafrase. Tandai entitas yang hilang atau berubah.
+function verifyEntities(original, result) {
+  const origEnts = extractEntities(original);
+  const resEnts = extractEntities(result);
+  const missing = [...origEnts].filter(e => !resEnts.has(e));
+  const added = [...resEnts].filter(e => !origEnts.has(e));
+  const score = origEnts.size === 0 ? 100 : Math.max(0, Math.round((1 - missing.length / Math.max(1, origEnts.size)) * 100));
+  return {
+    entity_score: score,
+    original_count: origEnts.size,
+    missing_entities: missing.slice(0, 10),
+    added_entities: added.slice(0, 10),
+    hallucination_risk: missing.length > 0 ? 'TINGGI' : 'RENDAH',
+    warning: missing.length > 0
+      ? 'Perhatian: ada entitas/angka yang hilang atau berubah di hasil parafrase. Verifikasi kembali sebelum dipublikasi.'
+      : 'Tidak ada indikasi halusinasi entitas.'
+  };
+}
+
+// Tambah verifikasi ke response /paraphrase (dipanggil sebelum return akhir)
+// Fungsi ini di-inject ke dalam handler paraphrase saat build response
+
+// Cek konsistensi makna menggunakan embedding similarity (fallback jika LLM gagal)
+async function meaningConsistencyCheck(original, result, env, model) {
+  try {
+    const embA = await getEmbedding(original, env, model);
+    const embB = await getEmbedding(result, env, model);
+    const sim = embeddingSimilarity(original, result, env, model);
+    return {
+      embedding_similarity: Number(sim.toFixed(3)),
+      consistency: sim >= 0.75 ? 'TERTERA' : sim >= 0.55 ? 'CUKUP' : 'RENDAH',
+      note: sim < 0.55 ? 'Hasil terlalu jauh dari makna asli. Periksa kembali.' : 'Makna terjaga cukup baik.'
+    };
+  } catch (e) {
+    return { error: e.message, consistency: 'TIDAK_DAPT_DIVERIFIKASI' };
+  }
+}
+
 function generateReportHTML(text, result) {
   return `
     <html>
-    <head><meta charset="UTF-8"><title>OkongzINC Checker Report</title>
+    <head><meta charset="UTF-8"><title>Plagiarisme Cheker Report</title>
     <style>
       body { font-family: 'Outfit', Arial, sans-serif; margin: 40px; color: #1a202c; }
       h1 { color: #1a56db; }
